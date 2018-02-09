@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define NUM_PROC 6
-int main (void){
+int main (){
     int pid;
     int i;
     for (i=0; i <= NUM_PROC; i++){
@@ -18,6 +18,5 @@ int main (void){
         }
     }
     wait();
-    while(1);
     exit(EXIT_SUCCESS);
 }
