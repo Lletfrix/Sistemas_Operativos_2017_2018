@@ -18,11 +18,11 @@ int main (int argc, char **argv){
 
     if(!strcmp(argv[argc-1], "-l")){
         exec_choice = EXECL;
-    }else if(!strcmp(argv[argc-1], "-lp"){
+    }else if(!strcmp(argv[argc-1], "-lp")){
         exec_choice = EXECLP;
-    }else if(!strcmp(argv[argc-1], "-v"){
+    }else if(!strcmp(argv[argc-1], "-v")){
         exec_choice = EXECV;
-    }else if(!strcmp(argv[argc-1], "-vp"){
+    }else if(!strcmp(argv[argc-1], "-vp")){
         exec_choice = EXECVP;
     }else{
         printf("Argument number %d is wrong.\n", argc-1);
