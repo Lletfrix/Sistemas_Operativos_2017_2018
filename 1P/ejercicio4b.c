@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
 #define NUM_PROC 6
 int main (void){
     int pid;
@@ -15,6 +18,7 @@ int main (void){
             }
         }
     }
-    wait();
+    wait(NULL);
+    while(1);
     exit(EXIT_SUCCESS);
 }

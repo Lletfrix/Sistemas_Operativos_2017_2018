@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
+
 #define STRING_LEN 80
 int main (){
     void* structure;
@@ -11,7 +14,7 @@ int main (){
         free(structure);
         return EXIT_SUCCESS;
     }
-    wait();
+    wait(NULL);
     fwrite(structure, sizeof(char), STRING_LEN+1, stdout);
     free(structure);
     return EXIT_SUCCESS;

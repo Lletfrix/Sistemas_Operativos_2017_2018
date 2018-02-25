@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #define EXECL 0
 #define EXECLP 1
@@ -15,8 +16,10 @@ void usage(){
 
 int main (int argc, char **argv){
     int exec_choice;
-    char *strarr[2];
-    char path[128];
+    char *strarr[4];
+    char bash_path[]={"/bin/bash"};
+    char bash_arg[]={"-c"};
+    char bash_name[]={"bash"};
     int i;
     if(argc <= 2){
         usage();
@@ -33,14 +36,13 @@ int main (int argc, char **argv){
         printf("Argument number %d is wrong.\n", argc-1);
         usage();
     }
-    sprintf(path, "/bin/bash");
     if( !fork() ){
         for(i = 1; i < argc - 1; i++){
             if( !fork() ){
                 switch (exec_choice) {
                     case EXECL:
                         //strcat(path, argv[i]);
-                        execl(path, "bash", "-c", argv[i], NULL);
+                        execl(bash_path, bash_name, bash_arg, argv[i], NULL);
                         fprintf(stderr, "Error in execl, with arg %s\n", argv[i]);
                         exit(1);
                     case EXECLP:
@@ -48,27 +50,28 @@ int main (int argc, char **argv){
                         fprintf(stderr, "Error in execlp\n");
                         exit(1);
                     case EXECV:
-                        strarr[0] = argv[i];
-                        strarr[1] = NULL;
-                        strcat(path, argv[i]);
-                        execv(path, strarr);
+                        strarr[0] = bash_path;
+                        strarr[1] = bash_arg;
+                        strarr[2] = argv[i];
+                        strarr[3] = NULL;
+                        execv(bash_path, strarr);
                         fprintf(stderr, "Error in execv\n");
                         exit(1);
                     case EXECVP:
                         strarr[0] = argv[i];
                         strarr[1] = NULL;
+                        execvp(argv[i], strarr);
                         fprintf(stderr, "Error in execvp\n");
-                        execv(argv[i], strarr);
                         exit(1);
                     default:
                         fprintf(stderr, "%s\n", "Something went wrong");
                         exit(1);
                 }
             }
-            wait();
+            wait(NULL);
         }
     }else{
-        wait();
+        wait(NULL);
     }
     exit(0);
 }
