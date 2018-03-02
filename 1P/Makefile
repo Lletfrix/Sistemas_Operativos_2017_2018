@@ -4,15 +4,15 @@
 #-----------------------
 CC = gcc
 CFLAGS = -g
-LDLIBS = -lm
-EXE = ejercicio4a ejercicio4b ejercicio5a ejercicio5b ejercicio6 ejercicio8 ejercicio9
+LDLIBS = -lm -pthread
+EXE = ejercicio4a ejercicio4b ejercicio5a ejercicio5b ejercicio6 ejercicio8 ejercicio9 ejercicio13a ejercicio13b
 BUILD_DIR = build
 
 all : $(EXE)
 
 .PHONY : clean
 clean :
-	rm -f *.o core $(EXE)
+	rm -f build/*.o core $(EXE)
 
 $(EXE) :
 	@echo "#---------------------------"
