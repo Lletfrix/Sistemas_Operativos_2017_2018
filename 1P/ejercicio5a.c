@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 
 #define NUM_PROC 6
-int main (){
+int main (void){
     int pid;
     int i;
     for (i=0; i <= NUM_PROC; i++){

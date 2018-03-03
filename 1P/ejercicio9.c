@@ -36,9 +36,6 @@ void main(int argc, char* argv[]){
         }
     }
     sprintf(datos, "%d,%d", atoi(argv[1]), atoi(argv[2]));
-    /*for (i = 0; i < 4; i++){
-      write(fd[i][1], datos, sizeof(datos));
-    }*/
     for (i = 0; i < 4; i++){
         if((cpid = fork()) == -1){
             while(wait(NULL) != -1){
