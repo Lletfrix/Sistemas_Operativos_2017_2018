@@ -5,7 +5,7 @@
 CC = gcc
 CFLAGS = -g
 LDLIBS = -lm -pthread
-EXE = ejercicio4a ejercicio4b ejercicio5a ejercicio5b ejercicio6 ejercicio8 ejercicio9 ejercicio13a ejercicio13b
+EXE = ejercicio4a ejercicio4b ejercicio5a ejercicio5b ejercicio6 ejercicio8 ejercicio9 ejercicio12a ejercicio12b ejercicio13a ejercicio13b
 BUILD_DIR = build
 
 all : $(EXE)

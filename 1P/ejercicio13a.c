@@ -132,5 +132,11 @@ int main(int argc, char const *argv[]) {
     pthread_create(&threads[1], NULL, mult_matr_esc, datos2);
     pthread_join(threads[0], NULL);
     pthread_join(threads[1], NULL);
+
+    libera_matriz(m1, size);
+    libera_matriz(m2, size);
+    free(datos1);
+    free(datos2);
+
     exit (0);
 }
