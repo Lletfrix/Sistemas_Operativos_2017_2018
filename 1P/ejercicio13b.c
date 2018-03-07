@@ -14,13 +14,7 @@ typedef struct datos_mult{
     int id;
     int *fila_actual[NUM_THREADS];
 } datos_mult_t;
-/**
-* @brief libera la memoria de la matriz
-*
-* Libera la memoria reservada por reserva_matriz.
-* @param matriz Doble puntero a entero que guarda la informacion de la matriz
-* @param filas Numero de filas de la matriz
-*/
+
 void libera_matriz (int **matriz,unsigned int filas){
     int i;
     if(!matriz) return;

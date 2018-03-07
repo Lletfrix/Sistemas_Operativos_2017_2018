@@ -1,3 +1,12 @@
+/**
+ * @brief Ejericio 8
+ *
+ * Este fichero contiene el código fuente del ejercicio 8 de la entrega.
+ * @file ejercicio8.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 07-03-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +19,7 @@
 #define EXECVP 3 /*!< Selección de ejecucion con execlvp */
 
 /**
- * @brief imprime el uso del programa
+ * @brief Imprime el uso del programa
  *
  * usage() imprime en stdout el uso correcto del programa.
  */

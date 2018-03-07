@@ -10,12 +10,6 @@
 #define SEC_TO_NSEC 1000000000 /*!< Constante de cambio entre segundos y nanosegundos */
 #define DOUBLE_SEC_TO_NSEC 1000000000.0 /*!< Constante de cambio entre segundos y nanosegundos como float*/
 
-/**
- * @brief Datos del hilo
- *
- * Esta estructura define los datos que usará el hilo, una string de
- * 100 caracteres y un entero n.
- */
 typedef struct estructura_hilo {
     char string[100];
     int n;

@@ -8,7 +8,7 @@
 #define NUM_THREADS 2 /*!< Numero de hilos */
 
 /**
- * @brief datos necesarios para la ejecucion de los hilos
+ * @brief Datos necesarios para la ejecucion de los hilos
  *
  * Esta estructura guarda los datos necesarios para la ejecucion
  * de los hilos, como la matriz, el escalar, el tamaño de la
@@ -23,7 +23,7 @@ typedef struct datos_mult{
 
 
 /**
-* @brief libera la memoria de la matriz
+* @brief Libera la memoria de la matriz
 *
 * Libera la memoria reservada por reserva_matriz.
 * @param matriz Doble puntero a entero que guarda la informacion de la matriz
