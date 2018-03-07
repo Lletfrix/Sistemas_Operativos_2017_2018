@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #define BUFF_SIZE 512
 #define NUM_THREADS 2
@@ -68,6 +69,7 @@ void *mult_matr_esc (void *data){
         }
         printf("Hilo %d multiplicando fila %d resultado%s\n", data_struct->id, i, buffer);
         sprintf(buffer, "");
+        sleep(2);
     }
     return NULL;
 }

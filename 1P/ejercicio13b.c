@@ -63,6 +63,7 @@ void *mult_matr_esc (void *data){
     char buffer[BUFF_SIZE], minibuffer[BUFF_SIZE];
     datos_mult_t *data_struct = (datos_mult_t *) data;
     for (i = 0; i < data_struct->size; ++i) {
+        (*data_struct->fila_actual[data_struct->id])++;
         sprintf(buffer, "Hilo %d multiplicando fila %d resultado ", data_struct->id+1, i);
         for (j = 0; j < data_struct->size; ++j) {
             data_struct->matriz[i][j] *= data_struct->escalar;
@@ -76,10 +77,8 @@ void *mult_matr_esc (void *data){
             printf("%s. El hilo %d aún no ha comenzado\n", buffer, other_id+1);
         }
         fflush(stdin);
-        //(*data_struct->fila_actual[data_struct->id])++;
-        (*data_struct->fila_actual[data_struct->id])++;
         sprintf(buffer, "");
-        sleep(1);
+        sleep(2);
     }
     return NULL;
 }
