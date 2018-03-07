@@ -13,10 +13,18 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define EXECL 0 /*!< Selección de ejecucion con execl */
-#define EXECLP 1 /*!< Selección de ejecucion con execlp */
-#define EXECV 2 /*!< Selección de ejecucion con execv */
-#define EXECVP 3 /*!< Selección de ejecucion con execlvp */
+typedef enum _listaExec listaExec;
+void usage();
+
+/**
+ * @brief Lista de posibles elecciones
+ */
+enum _listaExec {
+    EXECL, /*!< Selección de ejecucion con execl */
+    EXECLP, /*!< Selección de ejecucion con execlp */
+    EXECV, /*!< Selección de ejecucion con execv */
+    EXECVP /*!< Selección de ejecucion con execlvp */
+};
 
 /**
  * @brief Imprime el uso del programa
@@ -29,7 +37,7 @@ void usage(){
 }
 
 int main (int argc, char **argv){
-    int exec_choice;
+    listaExec exec_choice;
     char *strarr[4];
     char bash_path[]={"/bin/bash"};
     char bash_arg[]={"-c"};

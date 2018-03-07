@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 4a
+ *
+ * Este fichero contiene el código fuente del ejercicio 4a de la entrega.
+ * @file ejercicio4a.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 07-03-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 6
+ *
+ * Este fichero contiene el código fuente del ejercicio 6 de la entrega.
+ * @file ejercicio6.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 07-03-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

@@ -13,6 +13,10 @@ all : $(EXE)
 .PHONY : clean
 clean :
 	rm -f build/*.o core $(EXE)
+	rm -rf html/ latex/
+.PHONY : doc
+doc :
+	doxygen Doxyfile
 
 $(EXE) :
 	@echo "#---------------------------"
