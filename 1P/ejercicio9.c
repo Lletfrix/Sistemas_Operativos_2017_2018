@@ -15,58 +15,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-/**
- * @brief Factorial de un numero
- *
- * factorial() devuelve el valor del factorial de un numero
- * @param a numero entero no negativo
- * @return entero con valor factorial de a
- */
-int factorial(unsigned int a){
-    int i, fact;
-    fact = 1;
-    for(i = 2; i <= a; i++){
-      fact = fact * i;
-    }
-    return fact;
-}
-
-/**
- * @brief Coeficiente binomial
- *
- * binom_coef() devuelve el valor del coeficiente binomial de a sobre b
- * @param a Elemento superior del coeficiente binomial
- * @param b Elemento inferior del coeficiente binomial
- * @return Valor del coeficiente binomial
- */
-int binom_coef(unsigned int a, unsigned int b){
-    if(b == 1 || b == a){
-        return 1;
-    }
-    if(b > a){
-        return 0;
-    }
-    return (factorial(a))/((factorial(b))*factorial(a - b));
-}
-
-/**
- * @brief Lee los operandos a partir de un buffer.
- *
- * Lee operandos a partir de una cadena de caracteres separadas por comas.
- * @param oper buffer inicial
- * @param separaciones buffer donde se almacenan los tokens de oper
- * @param ops array de operandos.
- */
-void leer_operandos(char* oper, char* separaciones, int* ops){
-    int j;
-    separaciones = strtok(oper, ",");
-    j = 0;
-    while (separaciones != NULL){
-      ops[j] = atoi(separaciones);
-      separaciones = strtok(NULL, ",");
-      j++;
-    }
-}
+int factorial(unsigned int);
+int binom_coef(unsigned int, unsigned int);
+void leer_operandos(char* , char* , int*);
 
 void main(int argc, char* argv[]){
     int i, j, pipe_status, cpid, res;
@@ -152,5 +103,58 @@ void main(int argc, char* argv[]){
           read(fd[i+4][0], resultado, sizeof(resultado));
           printf("%s\n", resultado);
         }
+    }
+}
+
+/**
+ * @brief Factorial de un numero
+ *
+ * factorial() devuelve el valor del factorial de un numero
+ * @param a numero entero no negativo
+ * @return entero con valor factorial de a
+ */
+int factorial(unsigned int a){
+    int i, fact;
+    fact = 1;
+    for(i = 2; i <= a; i++){
+      fact = fact * i;
+    }
+    return fact;
+}
+
+/**
+ * @brief Coeficiente binomial
+ *
+ * binom_coef() devuelve el valor del coeficiente binomial de a sobre b
+ * @param a Elemento superior del coeficiente binomial
+ * @param b Elemento inferior del coeficiente binomial
+ * @return Valor del coeficiente binomial
+ */
+int binom_coef(unsigned int a, unsigned int b){
+    if(b == 1 || b == a){
+        return 1;
+    }
+    if(b > a){
+        return 0;
+    }
+    return (factorial(a))/((factorial(b))*factorial(a - b));
+}
+
+/**
+ * @brief Lee los operandos a partir de un buffer.
+ *
+ * Lee operandos a partir de una cadena de caracteres separadas por comas.
+ * @param oper buffer inicial
+ * @param separaciones buffer donde se almacenan los tokens de oper
+ * @param ops array de operandos.
+ */
+void leer_operandos(char* oper, char* separaciones, int* ops){
+    int j;
+    separaciones = strtok(oper, ",");
+    j = 0;
+    while (separaciones != NULL){
+      ops[j] = atoi(separaciones);
+      separaciones = strtok(NULL, ",");
+      j++;
     }
 }
