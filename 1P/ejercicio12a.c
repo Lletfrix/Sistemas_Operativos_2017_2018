@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 12a
+ *
+ * Este fichero contiene el código fuente del ejercicio 12a de la entrega.
+ * @file ejercicio12a.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 07-03-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>

@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 9
+ *
+ * Este fichero contiene el código fuente del ejercicio 9 de la entrega.
+ * @file ejercicio9.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 07-03-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -90,45 +99,45 @@ void main(int argc, char* argv[]){
         if(!cpid){
           switch(i){
             case 0:
-            close(fd[i][1]);
-            close(fd[i+4][0]);
-            read(fd[i][0], oper, sizeof(oper));
-            leer_operandos(oper, separaciones, ops);
-            res = pow(ops[0], ops[1]);
-            sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Potencia: %d", getpid(), ops[0], ops[1], res);
-            write(fd[i+4][1], mensj, sizeof(mensj));
-            exit(0);
+                close(fd[i][1]);
+                close(fd[i+4][0]);
+                read(fd[i][0], oper, sizeof(oper));
+                leer_operandos(oper, separaciones, ops);
+                res = pow(ops[0], ops[1]);
+                sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Potencia: %d", getpid(), ops[0], ops[1], res);
+                write(fd[i+4][1], mensj, sizeof(mensj));
+                exit(0);
             case 1:
-            close(fd[i][1]);
-            close(fd[i+4][0]);
-            read(fd[i][0], oper, sizeof(oper));
-            leer_operandos(oper, separaciones, ops);
-            res = ops[0]/ops[1];
-            res = factorial(res);
-            sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Factorial: %d", getpid(), ops[0], ops[1], res);
-            write(fd[i+4][1], mensj, sizeof(mensj));
-            exit(0);
+                close(fd[i][1]);
+                close(fd[i+4][0]);
+                read(fd[i][0], oper, sizeof(oper));
+                leer_operandos(oper, separaciones, ops);
+                res = ops[0]/ops[1];
+                res = factorial(res);
+                sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Factorial: %d", getpid(), ops[0], ops[1], res);
+                write(fd[i+4][1], mensj, sizeof(mensj));
+                exit(0);
             case 2:
-            close(fd[i][1]);
-            close(fd[i+4][0]);
-            read(fd[i][0], oper, sizeof(oper));
-            leer_operandos(oper, separaciones, ops);
-            res = binom_coef(ops[0], ops[1]);
-            sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Combinaciones: %d", getpid(), ops[0], ops[1], res);
-            write(fd[i+4][1], mensj, sizeof(mensj));
-            exit(0);
+                close(fd[i][1]);
+                close(fd[i+4][0]);
+                read(fd[i][0], oper, sizeof(oper));
+                leer_operandos(oper, separaciones, ops);
+                res = binom_coef(ops[0], ops[1]);
+                sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Combinaciones: %d", getpid(), ops[0], ops[1], res);
+                write(fd[i+4][1], mensj, sizeof(mensj));
+                exit(0);
             case 3:
-            close(fd[i][1]);
-            close(fd[i+4][0]);
-            read(fd[i][0], oper, sizeof(oper));
-            leer_operandos(oper, separaciones, ops);
-            res = fabs(ops[0]) + fabs(ops[1]);
-            sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Suma de absolutos: %d", getpid(), ops[0], ops[1], res);
-            write(fd[i+4][1], mensj, sizeof(mensj));
-            exit(0);
+                close(fd[i][1]);
+                close(fd[i+4][0]);
+                read(fd[i][0], oper, sizeof(oper));
+                leer_operandos(oper, separaciones, ops);
+                res = fabs(ops[0]) + fabs(ops[1]);
+                sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Suma de absolutos: %d", getpid(), ops[0], ops[1], res);
+                write(fd[i+4][1], mensj, sizeof(mensj));
+                exit(0);
             default:
-            fprintf(stderr, "Unexpected value of i = %d", i);
-            exit(1);
+                fprintf(stderr, "Unexpected value of i = %d", i);
+                exit(1);
           }
         }
     }
