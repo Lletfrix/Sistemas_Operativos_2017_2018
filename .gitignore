@@ -1,3 +1,7 @@
 # Compiled class file
 */build/*
 !*/build/.keep
+
+# Doxygen info
+*/html
+*/latex
