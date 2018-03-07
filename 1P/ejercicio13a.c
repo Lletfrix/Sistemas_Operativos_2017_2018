@@ -4,9 +4,16 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define BUFF_SIZE 512
-#define NUM_THREADS 2
+#define BUFF_SIZE 512 /*!< Tamaño del buffer */
+#define NUM_THREADS 2 /*!< Numero de hilos */
 
+/**
+ * @brief datos necesarios para la ejecucion de los hilos
+ *
+ * Esta estructura guarda los datos necesarios para la ejecucion
+ * de los hilos, como la matriz, el escalar, el tamaño de la
+ * matriz, y la id del hilo contrario.
+ */
 typedef struct datos_mult{
     int **matriz;
     int escalar;
@@ -14,6 +21,14 @@ typedef struct datos_mult{
     int id;
 } datos_mult_t;
 
+
+/**
+* @brief libera la memoria de la matriz
+*
+* Libera la memoria reservada por reserva_matriz.
+* @param matriz Doble puntero a entero que guarda la informacion de la matriz
+* @param filas Numero de filas de la matriz
+*/
 void libera_matriz (int **matriz,unsigned int filas){
     int i;
     if(!matriz) return;
@@ -23,8 +38,14 @@ void libera_matriz (int **matriz,unsigned int filas){
     }
     free(matriz);
 }
-
-int **reserva_matriz(int size){
+/**
+* @brief reserva memoria para la matriz
+*
+* Reserva la memoria de la matriz
+* @param size Tamaño de la matriz cuadrada
+* @return Doble puntero a entero con la memoria para la matriz, inicializada a 0.
+*/
+int **reserva_matriz(unsigned int size){
     int **m1, i;
     m1 = (int **) calloc(size, sizeof(int *));
     if(!m1) {
@@ -40,7 +61,16 @@ int **reserva_matriz(int size){
     return m1;
 }
 
-int **rellena_matriz (int** m1, char *buffer, int size){
+/**
+ * @brief Rellena la matriz con datos
+ *
+ * Dado un buffer, rellena la matriz con los datos de la cadena de
+ * caracteres.
+ * @param m1 Matriz con memoria asignada
+ * @param buffer Cadena de caracteres con la informacion de la matriz
+ * @param size Entero con el tamaño de la matriz
+ */
+int **rellena_matriz (int** m1, char *buffer, unsigned int size){
     int i, j;
     char *token;
     token = strtok(buffer, " ");
@@ -57,6 +87,13 @@ int **rellena_matriz (int** m1, char *buffer, int size){
     return m1;
 }
 
+/**
+ * @brief Multiplica la matriz por el escalar
+ *
+ * Dada una matriz y un escalar los multiplica entre sí.
+ * @param data Estructura datos_mult que almacena la informacion para ejecutar el hilo.
+ * @return NULL
+ */
 void *mult_matr_esc (void *data){
     int i, j;
     char buffer[BUFF_SIZE], minibuffer[BUFF_SIZE];
@@ -83,6 +120,7 @@ int main(int argc, char const *argv[]) {
     size = atoi(fgets(buffer, BUFF_SIZE, stdin));
     if (size > 5) {
         printf("Introduzca una dimension no superior a 5\n");
+        exit(-1);
     }
     printf("Introduzca multiplicador 1:\n");
     n1 = atoi(fgets(buffer, BUFF_SIZE, stdin));

@@ -14,7 +14,13 @@ typedef struct datos_mult{
     int id;
     int *fila_actual[NUM_THREADS];
 } datos_mult_t;
-
+/**
+* @brief libera la memoria de la matriz
+*
+* Libera la memoria reservada por reserva_matriz.
+* @param matriz Doble puntero a entero que guarda la informacion de la matriz
+* @param filas Numero de filas de la matriz
+*/
 void libera_matriz (int **matriz,unsigned int filas){
     int i;
     if(!matriz) return;
@@ -24,7 +30,13 @@ void libera_matriz (int **matriz,unsigned int filas){
     }
     free(matriz);
 }
-
+/**
+* @brief reserva memoria para la matriz
+*
+* Reserva la memoria de la matriz
+* @param size Tamaño de la matriz cuadrada
+* @return Doble puntero a entero con la memoria para la matriz, inicializada a 0.
+*/
 int **reserva_matriz(int size){
     int **m1, i;
     m1 = (int **) calloc(size, sizeof(int *));
@@ -40,7 +52,15 @@ int **reserva_matriz(int size){
     }
     return m1;
 }
-
+/**
+ * @brief Rellena la matriz con datos
+ *
+ * Dado un buffer, rellena la matriz con los datos de la cadena de
+ * caracteres.
+ * @param m1 Matriz con memoria asignada
+ * @param buffer Cadena de caracteres con la informacion de la matriz
+ * @param size Entero con el tamaño de la matriz
+ */
 int **rellena_matriz (int** m1, char *buffer, int size){
     int i, j;
     char *token;
@@ -57,7 +77,14 @@ int **rellena_matriz (int** m1, char *buffer, int size){
     }
     return m1;
 }
-
+/**
+ * @brief Multiplica la matriz por el escalar
+ *
+ * Dada una matriz y un escalar los multiplica entre sí.
+ * Además, imprime el estado del hilo contrario con cada multiplicacion de fila.
+ * @param data Estructura datos_mult que almacena la informacion para ejecutar el hilo.
+ * @return NULL
+ */
 void *mult_matr_esc (void *data){
     int i, j, other_id;
     char buffer[BUFF_SIZE], minibuffer[BUFF_SIZE];
@@ -92,6 +119,7 @@ int main(int argc, char const *argv[]) {
     size = atoi(fgets(buffer, BUFF_SIZE, stdin));
     if (size > 5) {
         printf("Introduzca una dimension no superior a 5\n");
+        exit(-1);
     }
     printf("Introduzca multiplicador 1:\n");
     n1 = atoi(fgets(buffer, BUFF_SIZE, stdin));

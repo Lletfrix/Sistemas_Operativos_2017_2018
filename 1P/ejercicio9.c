@@ -6,7 +6,14 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-int factorial(int a){
+/**
+ * @brief Factorial de un numero
+ *
+ * factorial() devuelve el valor del factorial de un numero
+ * @param a numero entero no negativo
+ * @return entero con valor factorial de a
+ */
+int factorial(unsigned int a){
     int i, fact;
     fact = 1;
     for(i = 2; i <= a; i++){
@@ -15,17 +22,54 @@ int factorial(int a){
     return fact;
 }
 
+/**
+ * @brief Coeficiente binomial
+ *
+ * binom_coef() devuelve el valor del coeficiente binomial de a sobre b
+ * @param a Elemento superior del coeficiente binomial
+ * @param b Elemento inferior del coeficiente binomial
+ * @return Valor del coeficiente binomial
+ */
+int binom_coef(unsigned int a, unsigned int b){
+    if(b == 1 || b == a){
+        return 1;
+    }
+    if(b > a){
+        return 0;
+    }
+    return (factorial(a))/((factorial(b))*factorial(a - b));
+}
+
+/**
+ * @brief Lee los operandos a partir de un buffer.
+ *
+ * Lee operandos a partir de una cadena de caracteres separadas por comas.
+ * @param oper buffer inicial
+ * @param separaciones buffer donde se almacenan los tokens de oper
+ * @param ops array de operandos.
+ */
+void leer_operandos(char* oper, char* separaciones, int* ops){
+    int j;
+    separaciones = strtok(oper, ",");
+    j = 0;
+    while (separaciones != NULL){
+      ops[j] = atoi(separaciones);
+      separaciones = strtok(NULL, ",");
+      j++;
+    }
+}
+
 void main(int argc, char* argv[]){
     int i, j, pipe_status, cpid, res;
     int fd[8][2];
     int ops[2];
     char datos[4];
-    char oper[4];
+    char oper[256];
     char mensj[256];
     char resultado[256];
     char* separaciones;
     if (argc != 3){
-      fprintf(stderr, "Usage is ./ejercicio8 op1 op2");
+      fprintf(stderr, "Usage is ./ejercicio9 op1 op2\n");
       exit(1);
     }
     for (i = 0; i < 8; i++){
@@ -49,13 +93,7 @@ void main(int argc, char* argv[]){
             close(fd[i][1]);
             close(fd[i+4][0]);
             read(fd[i][0], oper, sizeof(oper));
-            separaciones = strtok(oper, ",");
-            j = 0;
-            while (separaciones != NULL){
-              ops[j] = atoi(separaciones);
-              separaciones = strtok(NULL, ",");
-              j++;
-            }
+            leer_operandos(oper, separaciones, ops);
             res = pow(ops[0], ops[1]);
             sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Potencia: %d", getpid(), ops[0], ops[1], res);
             write(fd[i+4][1], mensj, sizeof(mensj));
@@ -64,13 +102,7 @@ void main(int argc, char* argv[]){
             close(fd[i][1]);
             close(fd[i+4][0]);
             read(fd[i][0], oper, sizeof(oper));
-            separaciones = strtok(oper, ",");
-            j = 0;
-            while (separaciones != NULL){
-              ops[j] = atoi(separaciones);
-              separaciones = strtok(NULL, ",");
-              j++;
-            }
+            leer_operandos(oper, separaciones, ops);
             res = ops[0]/ops[1];
             res = factorial(res);
             sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Factorial: %d", getpid(), ops[0], ops[1], res);
@@ -80,14 +112,8 @@ void main(int argc, char* argv[]){
             close(fd[i][1]);
             close(fd[i+4][0]);
             read(fd[i][0], oper, sizeof(oper));
-            separaciones = strtok(oper, ",");
-            j = 0;
-            while (separaciones != NULL){
-              ops[j] = atoi(separaciones);
-              separaciones = strtok(NULL, ",");
-              j++;
-            }
-            res = pow(ops[0], ops[1]);
+            leer_operandos(oper, separaciones, ops);
+            res = binom_coef(ops[0], ops[1]);
             sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Combinaciones: %d", getpid(), ops[0], ops[1], res);
             write(fd[i+4][1], mensj, sizeof(mensj));
             exit(0);
@@ -95,13 +121,7 @@ void main(int argc, char* argv[]){
             close(fd[i][1]);
             close(fd[i+4][0]);
             read(fd[i][0], oper, sizeof(oper));
-            separaciones = strtok(oper, ",");
-            j = 0;
-            while (separaciones != NULL){
-              ops[j] = atoi(separaciones);
-              j++;
-              separaciones = strtok(NULL, ",");
-            }
+            leer_operandos(oper, separaciones, ops);
             res = fabs(ops[0]) + fabs(ops[1]);
             sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Suma de absolutos: %d", getpid(), ops[0], ops[1], res);
             write(fd[i+4][1], mensj, sizeof(mensj));

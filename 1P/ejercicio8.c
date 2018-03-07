@@ -4,11 +4,16 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define EXECL 0
-#define EXECLP 1
-#define EXECV 2
-#define EXECVP 3
+#define EXECL 0 /*!< Selección de ejecucion con execl */
+#define EXECLP 1 /*!< Selección de ejecucion con execlp */
+#define EXECV 2 /*!< Selección de ejecucion con execv */
+#define EXECVP 3 /*!< Selección de ejecucion con execlvp */
 
+/**
+ * @brief imprime el uso del programa
+ *
+ * usage() imprime en stdout el uso correcto del programa.
+ */
 void usage(){
     printf("Usage is: ./ejercicio8 <program1> <program2> .... <-l|-lp|-v|-vp>\n");
     exit(1);

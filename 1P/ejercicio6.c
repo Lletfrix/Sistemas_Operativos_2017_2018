@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define STRING_LEN 80
+#define STRING_LEN 80 /*!< Numero maximo de caracteres en la string de la estrucutra */
 int main (){
     void* structure;
     int pid;
