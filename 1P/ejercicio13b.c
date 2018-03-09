@@ -12,7 +12,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include "ejercicio13.h"
+#include "ejercicio13lib.h"
 
 void *mult_matr_esc (void *data);
 
@@ -74,8 +74,21 @@ int main(int argc, char const *argv[]) {
     datos1->fila_actual[datos2->id] = &fila_actual[datos2->id];
     datos2->fila_actual[datos2->id] = &fila_actual[datos2->id];
 
-    pthread_create(&threads[0], NULL, mult_matr_esc, datos1);
-    pthread_create(&threads[1], NULL, mult_matr_esc, datos2);
+    if (pthread_create(&threads[0], NULL, mult_matr_esc, datos1)){
+        libera_matrix(m1, size);
+        libera_matriz(m2, size);
+        free(datos1);
+        free(datos2);
+        exit(EXIT_FAILURE);
+    }
+    if(pthread_create(&threads[1], NULL, mult_matr_esc, datos2)){
+        pthread_join(threads[0], NULL);
+        libera_matrix(m1, size);
+        libera_matriz(m2, size);
+        free(datos1);
+        free(datos2);
+        exit(EXIT_FAILURE);
+    }
     pthread_join(threads[0], NULL);
     pthread_join(threads[1], NULL);
 

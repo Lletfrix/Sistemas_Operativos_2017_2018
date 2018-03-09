@@ -12,7 +12,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include "ejercicio13.h"
+#include "ejercicio13lib.h"
 
 void *mult_matr_esc (void *data);
 

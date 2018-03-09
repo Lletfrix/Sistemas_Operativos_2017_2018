@@ -13,7 +13,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <time.h>
-#include "ejercicio12.h"
+#include "ejercicio12lib.h"
 
 int main(int argc, char const *argv[]) {
     estructuraHilo *e_hilo;

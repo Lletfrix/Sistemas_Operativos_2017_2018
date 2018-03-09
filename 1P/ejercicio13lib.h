@@ -9,8 +9,6 @@
  */
 #ifndef EjERCICIO13
 #define EjERCICIO13
-#define BUFF_SIZE 512 /*!< Tamaño del buffer */
-#define NUM_THREADS 2 /*!< Numero de hilos */
 
 /**
  * @brief Datos necesarios para la ejecucion de los hilos
@@ -19,13 +17,7 @@
  * de los hilos, como la matriz, el escalar, el tamaño de la
  * matriz, y la id del hilo contrario.
  */
-typedef struct _datosMult{
-    int **matriz;
-    int escalar;
-    int size;
-    int id;
-    int *fila_actual[NUM_THREADS];
-} datosMult;
+typedef struct _datosMult datosMult;
 
 
 /**

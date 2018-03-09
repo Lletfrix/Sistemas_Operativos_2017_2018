@@ -14,7 +14,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <pthread.h>
-#include "ejercicio12.h"
+#include "ejercicio12lib.h"
 
 int main(int argc, char const *argv[]) {
     estructuraHilo *e_hilo;
@@ -31,7 +31,13 @@ int main(int argc, char const *argv[]) {
     e_hilo->n = atoi(argv[1]);
     clock_gettime(CLOCK_REALTIME, &init);
     for (i = 0; i < NUM_THREADS; ++i) {
-        pthread_create(&threads[i], NULL, calcular_primos, e_hilo);
+        if(pthread_create(&threads[i], NULL, calcular_primos, e_hilo)){
+            for(j = i-1; j >= 0; j--){
+                pthread_join(threads[j], NULL);
+            }
+            free(e_hilo);
+            exit(EXIT_FAILURE);
+        }
     }
     for (i = 0; i < NUM_THREADS; ++i){
         pthread_join(threads[i], NULL);
