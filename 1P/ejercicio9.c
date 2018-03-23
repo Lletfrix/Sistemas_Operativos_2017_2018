@@ -15,15 +15,15 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-int factorial(unsigned int);
-int binom_coef(unsigned int, unsigned int);
+int factorial(int);
+int binom_coef(int, int);
 void leer_operandos(char* , char* , int*);
 
 void main(int argc, char* argv[]){
     int i, j, pipe_status, cpid, res;
     int fd[8][2];
     int ops[2];
-    char datos[4];
+    char datos[256];
     char oper[256];
     char mensj[256];
     char resultado[256];
@@ -54,7 +54,11 @@ void main(int argc, char* argv[]){
                 close(fd[i+4][0]);
                 read(fd[i][0], oper, sizeof(oper));
                 leer_operandos(oper, separaciones, ops);
-                res = pow(ops[0], ops[1]);
+                if(ops[1] < 0){
+                    res = 0;
+                }else{
+                    res = pow(ops[0], ops[1]);
+                }
                 sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Potencia: %d", getpid(), ops[0], ops[1], res);
                 write(fd[i+4][1], mensj, sizeof(mensj));
                 exit(0);
@@ -63,8 +67,12 @@ void main(int argc, char* argv[]){
                 close(fd[i+4][0]);
                 read(fd[i][0], oper, sizeof(oper));
                 leer_operandos(oper, separaciones, ops);
-                res = ops[0]/ops[1];
-                res = factorial(res);
+                if(ops[1] != 0){
+                    res = ops[0]/ops[1];
+                    res = factorial(res);
+                }else{
+                    res = 0;
+                }
                 sprintf(mensj, "Datos enviados a través de la tubería por el proceso PID = %d. Operando 1: %d. Operando 2: %d. Factorial: %d", getpid(), ops[0], ops[1], res);
                 write(fd[i+4][1], mensj, sizeof(mensj));
                 exit(0);
@@ -113,8 +121,11 @@ void main(int argc, char* argv[]){
  * @param a numero entero no negativo
  * @return entero con valor factorial de a
  */
-int factorial(unsigned int a){
+int factorial(int a){
     int i, fact;
+    if( a < 0){
+        return 0;
+    }
     fact = 1;
     for(i = 2; i <= a; i++){
       fact = fact * i;
@@ -130,7 +141,7 @@ int factorial(unsigned int a){
  * @param b Elemento inferior del coeficiente binomial
  * @return Valor del coeficiente binomial
  */
-int binom_coef(unsigned int a, unsigned int b){
+int binom_coef(int a, int b){
     if(b == 1 || b == a){
         return 1;
     }

@@ -11,13 +11,22 @@
 #define EJERCICIO12
 
 
+#define NUM_PROCS 100 /*!< Constante que define el numero de procesos a ejecutar*/
+#define NUM_THREADS 100 /*!< Constante que define el numero de hilos a ejecutar*/
+#define SEC_TO_NSEC 1000000000 /*!< Constante de cambio entre segundos y nanosegundos */
+#define DOUBLE_SEC_TO_NSEC 1000000000.0 /*!< Constante de cambio entre segundos y nanosegundos como float*/
+
 /**
  * @brief Datos del hilo
  *
  * Esta estructura define los datos que usará el hilo, una string de
  * 100 caracteres y un entero n.
  */
-typedef struct _estructuraHilo estructuraHilo;
+
+ typedef struct _estructuraHilo {
+     char string[100];
+     int n; /*!< Numero de primos a calcular */
+ }estructuraHilo;
 
 /**
  * @brief Comprueba si un numero es primo

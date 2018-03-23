@@ -7,18 +7,11 @@
  * @version 1.0
  * @date 07-03-2018
  */
-
-#define BUFF_SIZE 512 /*!< Tamaño del buffer */
-#define NUM_THREADS 2 /*!< Numero de hilos */
-
-typedef struct _datosMult{
-    int **matriz;
-    int escalar;
-    int size;
-    int id;
-    int *fila_actual[NUM_THREADS];
-};
-
+#include "ejercicio13lib.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <string.h>
 
 void libera_matriz (int **matriz,unsigned int filas){
     int i;

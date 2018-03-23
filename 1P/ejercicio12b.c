@@ -19,7 +19,7 @@
 int main(int argc, char const *argv[]) {
     estructuraHilo *e_hilo;
     struct timespec init, final;
-    int i;
+    int i, j;
     pthread_t threads[NUM_THREADS];
     long long nsec;
     double sec;
