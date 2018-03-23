@@ -9,15 +9,23 @@
 
 #define NUM_ITER 10
 
-void main(){
-    int len, i, num, pid, last_pid;
+void manejador_SIGUSR1(int sig){
+    return;
+}
+
+void main(int argc, char* argv[]){
+    int len, i, j, num, pid, last_pid;
+    void manejador_SIGUSR1();
     if(argc != 2){
         printf("Un único parámetro de entrada: el máximo número de hijos\n");
         exit(EXIT_FAILURE);
     }
+    if(signal(SIGUSR1, manejador_SIGUSR1) == SIG_ERR){
+        printf("Error al cambiar el manejador de SIGUSR1: %s", strerror(errno));
+    }
     len = strlen(argv[1]);
     for(i = 0; i < len; i++){
-        if(!isdigit(argv[1][i]){
+        if(!isdigit(argv[1][i])){
             printf("El argumento pasado no es un número entero positivo\n");
             exit(EXIT_FAILURE);
         }
@@ -33,15 +41,15 @@ void main(){
         }
         if(!pid){
             if(i != 0){
-                kill(last_pid, SIGKILL);
+                kill(last_pid, SIGTERM);
             }
             j = 0;
             while(1){
-                printf("Soy %d y estoy trabajando\n");
+                printf("Soy %d y estoy trabajando\n", getpid());
                 sleep(1);
                 j++;
                 if(j == 10){
-                    kill(getppid(), SIGCLD);
+                    kill(getppid(), SIGUSR1);
                 }
             }
         }
@@ -50,4 +58,7 @@ void main(){
             pause();
         }
     }
+    kill(last_pid, SIGTERM);
+    while (wait(NULL) != -1);
+    exit(EXIT_SUCCESS);
 }
