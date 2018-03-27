@@ -13,11 +13,11 @@ void main(){
     for(i = 0; i < MAX_HIJOS; i++){
         id = fork();
         if(id < 0){
-            printf("Error al usar fork: %s", strerror(errno));
+            printf("Error al usar fork: %s.", strerror(errno));
             exit(EXIT_FAILURE);
         }
         if(!id){
-            printf("Soy el proceso hijo %d\n", getpid());
+            printf("Soy el proceso hijo %d.\n", getpid());
             fflush(stdout);
             sleep(30);
             printf("Soy el proceso hijo %d y ya me toca terminar.\n", getpid());
