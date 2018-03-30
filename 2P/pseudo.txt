@@ -1,0 +1,64 @@
+PESEUDO 1 PADRE:
+
+para i de [0,N):
+    crearFichero(clientesCaja$i.txt)
+    para j de [1,50]:
+        a = randNum(0, 300)
+        write(a, clientesCaja$i.txt)
+    end
+end
+
+para i de [0, N):
+    fork()
+end
+
+mientras contador < N:
+    sigpause -- Mascara de TengoSkins y Tengo1000RP
+
+esperar a todos los hijos
+
+PESEUDO 2 CAJERO:
+mientras file != EOF{
+
+leer(Operacion)
+Sleep(randNum(1,5))
+
+down MutexHijo
+    leer(Subtotal)
+    sumar
+    write(Subtotal)
+up MutexHijo
+
+si sumar > 1000RP && dineroSacado == 1:
+down MutexCola
+    kill (getppid, Tengo1000RP)
+    Inserto en la Cola
+    dineroSacado == 0
+up MutexCola
+}
+
+
+
+
+--------------
+me espero a tener que recoger $$$$ == Me espero por una señal
+        Esta la cola vacia?:
+            No : Recojo dinero
+            Si : Me espero a tener que recoger $$$$
+
+Manejador señal Tengo1000RP:
+    Bloqueo Tengo1000RP y TengoSkins
+    down MutexHijo $i
+        RecojoDinero
+        down MutexCola
+            Extraigo
+            dineroHijo$iSacado = 1
+    up MutexHijo $i
+        up MutexCola
+    Desbloqueo Tengo1000RP y TengoSkins
+
+Manejador señal TengoSkins:
+    Bloqueo Tengo1000RP y TengoSkins
+    RecojoDinero
+    contador++
+    Desbloqueo Tengo1000RP y TengoSkins

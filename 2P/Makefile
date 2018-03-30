@@ -6,7 +6,11 @@ CC = gcc
 CFLAGS = -g
 LDLIBS = -lm -pthread
 EXE = ejercicio2 ejercicio4 ejercicio6a ejercicio6b
+LIBS = semaforos
+LIB_DIR = build/lib
 BUILD_DIR = build
+ZIP_NAME=G2202_P6_1
+DIST_PATH=./*
 
 all : $(EXE)
 
@@ -18,9 +22,16 @@ clean :
 doc :
 	doxygen Doxyfile
 
-$(EXE) :
+$(EXE) : $(LIBS)
 	@echo "#---------------------------"
 	@echo "# Generando $@ "
 	@echo "# Depende de $^"
 	@echo "# Ha cambiado $<"
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$@ $@.c $(LDLIBS)
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$@ $@.c $(LIB_DIR)/* $(LDLIBS)
+
+$(LIBS) :
+	$(CC) $(CFLAGS) -o $(LIB_DIR)/$@.o -c $@.c $(LDLIBS)
+
+.PHONY: dist
+dist:
+	zip -r $(ZIP_NAME).zip $(DIST_PATH)

@@ -10,7 +10,7 @@
 #include <ctype.h>
 
 #define NUM_PROC 5
-#define SECS 10
+#define SECS 40
 
 void sigaddset_var(sigset_t *sigt, int sig, ...){
     va_list args;
