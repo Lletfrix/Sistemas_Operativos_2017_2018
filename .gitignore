@@ -7,7 +7,7 @@
 */latex
 
 # Other directories
-text/*
+*/text/*
 !*/text/.keep
-dat/*
+*/dat/*
 !*/dat/.keep
