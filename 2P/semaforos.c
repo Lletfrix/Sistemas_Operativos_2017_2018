@@ -28,12 +28,21 @@ int borrar_semaforo(int semid){
 
 int crear_semaforo(key_t key, int size, int *semid){
     int retorno;
+    short *initial = NULL;
+
     if(!semid){
         return ERROR;
     }
+    initial = calloc(size, sizeof(short));
+    if(!initial){
+        return ERROR;
+    }
+
     retorno = semget(key, size, IPC_CREAT);
     *semid = retorno;
+    retorno = inicializar_semaforo(retorno, initial);
     (retorno == -1) ? retorno = ERROR : OK;
+    free(initial);
     return retorno;
 }
 
