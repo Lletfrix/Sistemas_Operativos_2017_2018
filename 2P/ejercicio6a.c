@@ -6,24 +6,12 @@
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
-#include <stdarg.h>
 #include <ctype.h>
+
+#include "mysignal.h"
 
 #define NUM_PROC 5
 #define SECS 40
-
-void sigaddset_var(sigset_t *sigt, int sig, ...){
-    va_list args;
-    int i;
-
-    va_start(args, sig);
-    for (i = sig; i != -1; i = va_arg(args, int)) {
-        sigaddset(sigt, i);
-    }
-    va_end(args);
-    return;
-}
-
 
 int main (void){
     sigset_t set, unset, oset;

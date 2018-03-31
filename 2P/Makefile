@@ -5,8 +5,8 @@
 CC = gcc
 CFLAGS = -g
 LDLIBS = -lm -pthread
-EXE = ejercicio2 ejercicio4 ejercicio6a ejercicio6b
-LIBS = semaforos
+EXE = ejercicio2 ejercicio4 ejercicio6a ejercicio6b ejercicio9
+LIBS = semaforos mysignal
 LIB_DIR = build/lib
 BUILD_DIR = build
 ZIP_NAME=G2202_P6_1

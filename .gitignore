@@ -5,3 +5,9 @@
 # Doxygen info
 */html
 */latex
+
+# Other directories
+text/*
+!*/text/.keep
+dat/*
+!*/dat/.keep
