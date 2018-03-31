@@ -48,11 +48,11 @@ int crear_semaforo(key_t key, int size, int *semid){
 
 int down_semaforo(int semid, int num_sem, int undo){
     int retorno;
-    struct sembuf sops;
-    sops.sem_num = num_sem;
-    sops.sem_op = -1;
-    sops.sem_flg = undo;
-    retorno = semop(semid, &sops, 1);
+    struct sembuf sops[1];
+    sops[0].sem_num = num_sem;
+    sops[0].sem_op = -1;
+    sops[0].sem_flg = undo;
+    retorno = semop(semid, sops, 1);
     (retorno == -1) ? retorno = ERROR : OK;
     return retorno;
 }
@@ -80,11 +80,11 @@ int downMultiple_semaforo(int semid, int size, int undo, int *active){
 
 int up_semaforo(int semid, int num_sem, int undo){
     int retorno;
-    struct sembuf sops;
-    sops.sem_num = num_sem;
-    sops.sem_op = 1;
-    sops.sem_flg = undo;
-    retorno = semop(semid, &sops, 1);
+    struct sembuf sops[1];
+    sops[0].sem_num = num_sem;
+    sops[0].sem_op = 1;
+    sops[0].sem_flg = undo;
+    retorno = semop(semid, sops, 1);
     (retorno == -1) ? retorno = ERROR : OK;
     return retorno;
 }

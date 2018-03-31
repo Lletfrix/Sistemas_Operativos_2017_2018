@@ -12,8 +12,8 @@
 #include "semaforos.h"
 #include "mysignal.h"
 
-#define NUM_CAJ 25
-#define NUM_OPER 50
+#define NUM_CAJ 2
+#define NUM_OPER 25
 #define KEY 2018
 #define SIGMONEY SIGUSR1
 #define TEXTDIR "text/"
@@ -21,7 +21,7 @@
 
 static volatile int mutex_hijo, terminados;
 static volatile bool dinero_sacado[NUM_CAJ];
-static volatile float cuenta;
+static volatile float cuenta = 0;
 
 int increase_subtotal(char *filename, float delta){
     FILE *fp;
@@ -42,7 +42,7 @@ void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
     int caja;
     char filename[256];
     caja = info->si_int;
-    printf("He entrado en SIGMONEY\n");
+    printf("He entrado en SIGMONEY desde la caja %d\n", caja);
     sprintf(filename, DATDIR "caja%d.dat", caja+1);
     while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     if(ERROR == increase_subtotal(filename, -900)){
@@ -59,13 +59,14 @@ void handle_SIGCLD(int sig, siginfo_t *info, void *vp){
     char filename[256];
     FILE *fp;
     caja = info->si_int;
-    printf("He entrado en SIGCLD\n");
+    printf("He entrado en SIGCLD desde la caja %d\n", caja);
     sprintf(filename, DATDIR "caja%d.dat", caja+1);
     while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     fp = fopen(filename, "r+");
     fread(&dinero, sizeof(float), 1,fp);
     cuenta += dinero;
     dinero = 0;
+    fseek(fp, 0, SEEK_SET);
     fwrite(&dinero, sizeof(float), 1, fp);
     fclose(fp);
     while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
@@ -101,7 +102,7 @@ void cajero(int id){
     dinero_sacado[id] = true;
     while(fgets(price, sizeof(price), fp)){
         p = atof(price);
-        sleep((int) randNum(1, 6));
+        sleep((int) randNum(1, 3));
         printf("Soy %d y voy a esperar por mi mutex\n", id);
         while(down_semaforo(mutex_hijo, id, IPC_NOWAIT));
         if(ERROR == (p = increase_subtotal(filename_caja, p))){
@@ -111,10 +112,10 @@ void cajero(int id){
         while(up_semaforo(mutex_hijo, id, IPC_NOWAIT));
         if(p > 1000 && dinero_sacado[id] == true){
             sigqueue(getppid(), SIGMONEY, val);
-            dinero_sacado == false;
+            dinero_sacado[id] = false;
         }
     }
-    printf("He terminado con id: %d\n", id);
+    printf("He terminado con id: %d\n", val.sival_int);
     sigqueue(getppid(), SIGCLD, val);
     exit(EXIT_SUCCESS);
 }
@@ -124,7 +125,7 @@ int main(int argc, char const *argv[]) {
     pid_t pid;
     char filename[256];
     sigset_t mask, o_mask;
-    short mutex_initial[NUM_CAJ] = {1};
+    unsigned short mutex_initial[NUM_CAJ];
     FILE *f = NULL;
     struct sigaction get_900, end_caja;
 
@@ -154,7 +155,14 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
     mutex_hijo = fake_semid;
-    inicializar_semaforo(mutex_hijo, mutex_initial);
+
+    for (i = 0; i<NUM_CAJ; ++i){
+        mutex_initial[i]=1;
+    }
+    if(ERROR == inicializar_semaforo(mutex_hijo, mutex_initial)){
+        printf("Error al inicializar el semaforo: %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
+    }
 
     /* Generate transaction files */
     for (i = 0; i < NUM_CAJ; ++i) {
