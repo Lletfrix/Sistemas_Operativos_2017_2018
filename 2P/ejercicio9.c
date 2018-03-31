@@ -54,14 +54,14 @@ void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
     return;
 }
 
-void handle_SIGCLD(int sig, siginfo_t *info, void *vp){
+void handle_SIGUSR2(int sig, siginfo_t *info, void *vp){
     int caja, dinero;
     char filename[256];
     FILE *fp;
     caja = info->si_int;
-    printf("He entrado en SIGCLD desde la caja %d\n", caja);
+    printf("He entrado en SIGUSR2 desde la caja %d\n", caja);
     sprintf(filename, DATDIR "caja%d.dat", caja+1);
-    while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
+    //while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     fp = fopen(filename, "r+");
     fread(&dinero, sizeof(float), 1,fp);
     cuenta += dinero;
@@ -69,7 +69,7 @@ void handle_SIGCLD(int sig, siginfo_t *info, void *vp){
     fseek(fp, 0, SEEK_SET);
     fwrite(&dinero, sizeof(float), 1, fp);
     fclose(fp);
-    while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
+    //while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     terminados++;
 }
 
@@ -116,7 +116,7 @@ void cajero(int id){
         }
     }
     printf("He terminado con id: %d\n", val.sival_int);
-    sigqueue(getppid(), SIGCLD, val);
+    sigqueue(getppid(), SIGUSR2, val);
     exit(EXIT_SUCCESS);
 }
 
@@ -132,23 +132,23 @@ int main(int argc, char const *argv[]) {
     get_900.sa_sigaction = handle_SIGMONEY;
     get_900.sa_flags = SA_SIGINFO;
     sigemptyset(&get_900.sa_mask);
-    sigaddset(&get_900.sa_mask, SIGCLD);
+    sigaddset(&get_900.sa_mask, SIGUSR2);
     if(sigaction(SIGMONEY, &get_900, NULL) == -1){
         printf("Error al cambiar el manejador de SIGUSR1: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    end_caja.sa_sigaction = handle_SIGCLD;
+    end_caja.sa_sigaction = handle_SIGUSR2;
     end_caja.sa_flags = SA_SIGINFO;
     sigemptyset(&end_caja.sa_mask);
     sigaddset(&end_caja.sa_mask, SIGMONEY);
-    if(sigaction(SIGCLD, &end_caja, NULL) == -1){
-        printf("Error al cambiar el manejador de SIGCLD: %s", strerror(errno));
+    if(sigaction(SIGUSR2, &end_caja, NULL) == -1){
+        printf("Error al cambiar el manejador de SIGUSR2: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     sigemptyset(&mask);
-    sigaddset_var(&mask, SIGMONEY, SIGCLD, -1);
+    sigaddset_var(&mask, SIGMONEY, SIGUSR2, -1);
 
     if(ERROR == crear_semaforo(KEY, NUM_CAJ, &fake_semid)){
         printf("Error al crear el semaforo: %s\n", strerror(errno));
