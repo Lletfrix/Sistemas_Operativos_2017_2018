@@ -13,9 +13,11 @@
 #include "mysignal.h"
 
 #define NUM_CAJ 2
-#define NUM_OPER 25
+#define NUM_OPER 50
 #define KEY 2018
+#define PATH "/bin/bash"
 #define SIGMONEY SIGUSR1
+#define SIGDONE SIGUSR2
 #define TEXTDIR "text/"
 #define DATDIR "dat/"
 
@@ -23,7 +25,7 @@ static volatile int mutex_hijo, terminados;
 static volatile bool dinero_sacado[NUM_CAJ];
 static volatile float cuenta = 0;
 
-int increase_subtotal(char *filename, float delta){
+float increase_subtotal(char *filename, float delta){
     FILE *fp;
     float dinero;
     fp = fopen(filename, "r+");
@@ -49,17 +51,19 @@ void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
         fprintf(stderr, "Cannot open file\n");
     };
     cuenta += 900;
+    printf("%f\n", cuenta);
     dinero_sacado[caja] = true;
     while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     return;
 }
 
-void handle_SIGUSR2(int sig, siginfo_t *info, void *vp){
-    int caja, dinero;
+void handle_SIGDONE(int sig, siginfo_t *info, void *vp){
+    int caja;
+    float dinero;
     char filename[256];
     FILE *fp;
     caja = info->si_int;
-    printf("He entrado en SIGUSR2 desde la caja %d\n", caja);
+    printf("He entrado en SIGDONE desde la caja %d\n", caja);
     sprintf(filename, DATDIR "caja%d.dat", caja+1);
     //while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     fp = fopen(filename, "r+");
@@ -116,7 +120,7 @@ void cajero(int id){
         }
     }
     printf("He terminado con id: %d\n", val.sival_int);
-    sigqueue(getppid(), SIGUSR2, val);
+    sigqueue(getppid(), SIGDONE, val);
     exit(EXIT_SUCCESS);
 }
 
@@ -132,25 +136,25 @@ int main(int argc, char const *argv[]) {
     get_900.sa_sigaction = handle_SIGMONEY;
     get_900.sa_flags = SA_SIGINFO;
     sigemptyset(&get_900.sa_mask);
-    sigaddset(&get_900.sa_mask, SIGUSR2);
+    sigaddset(&get_900.sa_mask, SIGDONE);
     if(sigaction(SIGMONEY, &get_900, NULL) == -1){
         printf("Error al cambiar el manejador de SIGUSR1: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    end_caja.sa_sigaction = handle_SIGUSR2;
+    end_caja.sa_sigaction = handle_SIGDONE;
     end_caja.sa_flags = SA_SIGINFO;
     sigemptyset(&end_caja.sa_mask);
     sigaddset(&end_caja.sa_mask, SIGMONEY);
-    if(sigaction(SIGUSR2, &end_caja, NULL) == -1){
-        printf("Error al cambiar el manejador de SIGUSR2: %s", strerror(errno));
+    if(sigaction(SIGDONE, &end_caja, NULL) == -1){
+        printf("Error al cambiar el manejador de SIGDONE: %s", strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     sigemptyset(&mask);
-    sigaddset_var(&mask, SIGMONEY, SIGUSR2, -1);
+    sigaddset_var(&mask, SIGMONEY, SIGDONE, -1);
 
-    if(ERROR == crear_semaforo(KEY, NUM_CAJ, &fake_semid)){
+    if(ERROR == crear_semaforo(ftok(PATH, KEY), NUM_CAJ, &fake_semid)){
         printf("Error al crear el semaforo: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -196,6 +200,6 @@ int main(int argc, char const *argv[]) {
     sigprocmask(SIG_UNBLOCK, &mask, NULL);
     borrar_semaforo(mutex_hijo);
     while(wait(NULL) != -1);
-    printf("El total recaudado es: %f\n", cuenta);
+    printf("El total recaudado es: %.2f €\n", cuenta);
     exit(EXIT_SUCCESS);
 }
