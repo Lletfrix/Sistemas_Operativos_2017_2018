@@ -1,11 +1,12 @@
 #include <sys/sem.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "semaforos.h"
 int inicializar_semaforo(int semid, unsigned short *array){
     int retorno;
-    
+
     union semun{
         int val;
         struct semid_ds *buf;
@@ -20,7 +21,7 @@ int inicializar_semaforo(int semid, unsigned short *array){
 
 int borrar_semaforo(int semid){
     int retorno;
-    retorno = semctl(semid, 0, IPC_RMID);
+    retorno = semctl(semid, 0, IPC_RMID, 0);
     (retorno == -1) ? retorno = ERROR : OK;
     return retorno;
 }
@@ -31,13 +32,16 @@ int crear_semaforo(key_t key, int size, int *semid){
 
     if(!semid){
         return ERROR;
+
+    }
+    retorno = semget(key, size, IPC_CREAT | IPC_EXCL);
+    if(retorno == -1 && errno == EEXIST){
+        return 1;
     }
     initial = calloc(size, sizeof(short));
     if(!initial){
         return ERROR;
     }
-
-    retorno = semget(key, size, IPC_CREAT);
     *semid = retorno;
     retorno = inicializar_semaforo(retorno, initial);
     (retorno == -1) ? retorno = ERROR : OK;

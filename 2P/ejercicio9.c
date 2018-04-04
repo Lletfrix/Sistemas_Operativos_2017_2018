@@ -13,17 +13,17 @@
 #include "mysignal.h"
 
 #define NUM_CAJ 2
-#define NUM_OPER 50
+#define NUM_OPER 15
 #define KEY 2018
 #define PATH "/bin/bash"
-#define SIGMONEY SIGUSR1
-#define SIGDONE SIGUSR2
+#define SIGMONEY SIGRTMIN+0
+#define SIGDONE SIGRTMIN+1
 #define TEXTDIR "text/"
 #define DATDIR "dat/"
 #define LEE 1
 #define ESCRIBE 0
 
-static volatile int mutex_hijo, terminados;
+static volatile int mutex_hijo, mutex_signal, terminados;
 //static volatile bool dinero_sacado[NUM_CAJ];
 static volatile float cuenta = 0;
 
@@ -74,12 +74,16 @@ void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
     printf("He entrado en SIGMONEY desde la caja %d\n", caja);
     sprintf(filename, DATDIR "caja%d.dat", caja+1);
     while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
+    if(increase_subtotal(filename, 0) < 1000 ){
+        while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
+        return;
+    }
     if(ERROR == increase_subtotal(filename, -900)){
         fprintf(stderr, "Cannot open file\n");
     };
     cuenta += 900;
     printf("%f\n", cuenta);
-    saca_dinero(filename, true, ESCRIBE);
+    //saca_dinero(filename, true, ESCRIBE);
     while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     return;
 }
@@ -87,10 +91,12 @@ void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
 /* Majeador de SIGDONE */
 void handle_SIGDONE(int sig, siginfo_t *info, void *vp){
     int caja;
+    pid_t pid;
     float dinero;
     char filename[256];
     FILE *fp;
     caja = info->si_int;
+    pid = info->si_pid;
     printf("He entrado en SIGDONE desde la caja %d\n", caja);
     sprintf(filename, DATDIR "caja%d.dat", caja+1);
     //while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
@@ -101,6 +107,7 @@ void handle_SIGDONE(int sig, siginfo_t *info, void *vp){
     fseek(fp, 0, SEEK_SET);
     fwrite(&dinero, sizeof(float), 1, fp);
     fclose(fp);
+    kill(pid, SIGKILL);
     //while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     terminados++;
 }
@@ -148,15 +155,20 @@ void cajero(int id){
             fprintf(stderr, "Cannot open file\n");
         };
         printf("%f from id: %d\n", p, id);
-        if(p > 1000 && (booleano = saca_dinero(filename_caja, true, LEE)) == true){
+        if(p > 1000){
+            sigqueue(getppid(), SIGMONEY, val);
+        }
+        /*if(p > 1000 && (booleano = saca_dinero(filename_caja, true, LEE)) == true){
             sigqueue(getppid(), SIGMONEY, val);
             saca_dinero(filename_caja, false, ESCRIBE);
-        }
-        printf("DEBUG PURPOSE: Mi booleano es: %d from id %d\n", booleano, val.sival_int);
+        }*/
+        //printf("DEBUG PURPOSE: Mi booleano es: %d from id %d\n", booleano, val.sival_int);
         while(up_semaforo(mutex_hijo, id, IPC_NOWAIT));
     }
     printf("DEBUG PURPOSE: He terminado con id: %d\n", val.sival_int);
-    sigqueue(getppid(), SIGDONE, val);
+    while(1){
+        sigqueue(getppid(), SIGDONE, val);
+    };
     exit(EXIT_SUCCESS);
 }
 
@@ -165,7 +177,7 @@ int main(int argc, char const *argv[]) {
     pid_t pid;
     char filename[256];
     sigset_t mask, o_mask;
-    unsigned short mutex_initial[NUM_CAJ];
+    unsigned short initial_sem_val[NUM_CAJ];
     FILE *f = NULL;
     struct sigaction get_900, end_caja;
 
@@ -188,7 +200,6 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    sigemptyset(&mask);
     sigaddset_var(&mask, SIGMONEY, SIGDONE, -1);
 
     /* Set de semaforos */
@@ -200,9 +211,9 @@ int main(int argc, char const *argv[]) {
     mutex_hijo = fake_semid;
 
     for (i = 0; i<NUM_CAJ; ++i){
-        mutex_initial[i]=1;
+        initial_sem_val[i]=1;
     }
-    if(ERROR == inicializar_semaforo(mutex_hijo, mutex_initial)){
+    if(ERROR == inicializar_semaforo(mutex_hijo, initial_sem_val)){
         printf("Error al inicializar el semaforo: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -234,11 +245,15 @@ int main(int argc, char const *argv[]) {
     }
 
     terminados = 0;
-    sigprocmask(SIG_BLOCK, &mask, &o_mask);
+    sigfillset(&o_mask);
+    sigdelset(&o_mask, SIGMONEY);
+    sigdelset(&o_mask, SIGDONE);
+    /*sigprocmask(SIG_BLOCK, &mask, &o_mask);
+    sigprocmask(SIG_UNBLOCK, &mask, NULL);*/
+    //sigprocmask(SIG_BLOCK, &mask, NULL);
     while (terminados < NUM_CAJ) {
         sigsuspend(&o_mask);
     }
-    sigprocmask(SIG_UNBLOCK, &mask, NULL);
     borrar_semaforo(mutex_hijo);
     while(wait(NULL) != -1);
     printf("El total recaudado es: %.2f €\n", cuenta);
