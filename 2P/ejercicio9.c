@@ -20,11 +20,14 @@
 #define SIGDONE SIGUSR2
 #define TEXTDIR "text/"
 #define DATDIR "dat/"
+#define LEE 1
+#define ESCRIBE 0
 
 static volatile int mutex_hijo, terminados;
-static volatile bool dinero_sacado[NUM_CAJ];
+//static volatile bool dinero_sacado[NUM_CAJ];
 static volatile float cuenta = 0;
 
+/* Aumenta el total del archivo dato con el arguento delta */
 float increase_subtotal(char *filename, float delta){
     FILE *fp;
     float dinero;
@@ -40,6 +43,30 @@ float increase_subtotal(char *filename, float delta){
     return dinero;
 }
 
+bool saca_dinero(char *filename, bool dinero_sacado, int flag){
+    FILE *fp;
+    bool retorno;
+    fp = fopen(filename, "r+");
+    if(!fp){
+        printf("Cannot open file\n");
+        return false;
+    }
+    fseek(fp, sizeof(float), SEEK_SET);
+    if(flag == LEE){
+        fread(&retorno, sizeof(bool), 1, fp);
+        return retorno;
+    }else if(flag == ESCRIBE){
+        fwrite(&dinero_sacado, sizeof(bool), 1, fp);
+    }else{
+        printf("Argument error\n");
+        fclose(fp);
+        return false;
+    }
+    fclose(fp);
+    return true;
+}
+
+/* Majeador de SIGMONEY */
 void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
     int caja;
     char filename[256];
@@ -52,11 +79,12 @@ void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
     };
     cuenta += 900;
     printf("%f\n", cuenta);
-    dinero_sacado[caja] = true;
+    saca_dinero(filename, true, ESCRIBE);
     while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     return;
 }
 
+/* Majeador de SIGDONE */
 void handle_SIGDONE(int sig, siginfo_t *info, void *vp){
     int caja;
     float dinero;
@@ -77,6 +105,7 @@ void handle_SIGDONE(int sig, siginfo_t *info, void *vp){
     terminados++;
 }
 
+/* Funcion generadora de numeros aleatorios en el rango [inf, sup) */
 float randNum(float inf, float sup){
     float temp, r;
     if (!(temp = sup - inf)){
@@ -90,36 +119,43 @@ float randNum(float inf, float sup){
     return r;
 }
 
+/* Rutina que ejecutará cada hijo. Recibe su id como argumento. */
 void cajero(int id){
     FILE *fp, *fp_caja;
     char filename[256], filename_caja[256], price[8];
     float p;
     union sigval val;
+    bool booleano;
 
+    /* Abre el archivo de transacciones y crea el archivo del dinero
+       de la caja */
     sprintf(filename, TEXTDIR "clientesCaja%d.txt", id+1);
     fp = fopen(filename, "r");
     sprintf(filename_caja, DATDIR "caja%d.dat", id+1);
     fp_caja = fopen(filename_caja, "w");
+    saca_dinero(filename_caja, true, ESCRIBE);
     fclose(fp_caja);
 
+    /* Rellena el entero que enviaremos con sigqueue */
     val.sival_int = id;
-    dinero_sacado[id] = true;
+
+    //dinero_sacado[id] = true;
     while(fgets(price, sizeof(price), fp)){
         p = atof(price);
         sleep((int) randNum(1, 3));
-        printf("Soy %d y voy a esperar por mi mutex\n", id);
         while(down_semaforo(mutex_hijo, id, IPC_NOWAIT));
         if(ERROR == (p = increase_subtotal(filename_caja, p))){
             fprintf(stderr, "Cannot open file\n");
         };
         printf("%f from id: %d\n", p, id);
-        while(up_semaforo(mutex_hijo, id, IPC_NOWAIT));
-        if(p > 1000 && dinero_sacado[id] == true){
+        if(p > 1000 && (booleano = saca_dinero(filename_caja, true, LEE)) == true){
             sigqueue(getppid(), SIGMONEY, val);
-            dinero_sacado[id] = false;
+            saca_dinero(filename_caja, false, ESCRIBE);
         }
+        printf("DEBUG PURPOSE: Mi booleano es: %d from id %d\n", booleano, val.sival_int);
+        while(up_semaforo(mutex_hijo, id, IPC_NOWAIT));
     }
-    printf("He terminado con id: %d\n", val.sival_int);
+    printf("DEBUG PURPOSE: He terminado con id: %d\n", val.sival_int);
     sigqueue(getppid(), SIGDONE, val);
     exit(EXIT_SUCCESS);
 }
@@ -133,6 +169,7 @@ int main(int argc, char const *argv[]) {
     FILE *f = NULL;
     struct sigaction get_900, end_caja;
 
+    /* Set de manejadores y selañes */
     get_900.sa_sigaction = handle_SIGMONEY;
     get_900.sa_flags = SA_SIGINFO;
     sigemptyset(&get_900.sa_mask);
@@ -153,6 +190,8 @@ int main(int argc, char const *argv[]) {
 
     sigemptyset(&mask);
     sigaddset_var(&mask, SIGMONEY, SIGDONE, -1);
+
+    /* Set de semaforos */
 
     if(ERROR == crear_semaforo(ftok(PATH, KEY), NUM_CAJ, &fake_semid)){
         printf("Error al crear el semaforo: %s\n", strerror(errno));
@@ -181,6 +220,7 @@ int main(int argc, char const *argv[]) {
         fclose(f);
     }
 
+    /* Creacion de procesos hijo */
     for (i = 0; i < NUM_CAJ; ++i){
         pid = fork();
         if(!pid){
@@ -190,6 +230,7 @@ int main(int argc, char const *argv[]) {
 
     if(!pid){
         cajero(i);
+        exit(EXIT_FAILURE);
     }
 
     terminados = 0;

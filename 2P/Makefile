@@ -9,7 +9,7 @@ EXE = ejercicio2 ejercicio4 ejercicio6a ejercicio6b ejercicio9
 LIBS = semaforos mysignal
 LIB_DIR = build/lib
 BUILD_DIR = build
-ZIP_NAME=G2202_P6_1
+ZIP_NAME=G2202_P6_2
 DIST_PATH=./*
 
 all : $(EXE)

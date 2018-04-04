@@ -5,14 +5,13 @@
 #include "semaforos.h"
 int inicializar_semaforo(int semid, unsigned short *array){
     int retorno;
-    //struct semid_ds semid_ds;
+    
     union semun{
         int val;
         struct semid_ds *buf;
         ushort *array;
     }arg;
 
-    //arg.buf = &semid_ds;
     arg.array = array;
     retorno = semctl(semid, 0, SETALL, arg);
     (retorno == -1) ? retorno = ERROR : OK;
