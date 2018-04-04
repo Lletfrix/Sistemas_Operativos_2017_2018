@@ -13,11 +13,11 @@
 #include "mysignal.h"
 
 #define NUM_CAJ 2
-#define NUM_OPER 50
+#define NUM_OPER 15
 #define KEY 2018
 #define PATH "/bin/bash"
-#define SIGMONEY SIGUSR1
-#define SIGDONE SIGUSR2
+#define SIGMONEY SIGRTMIN+0
+#define SIGDONE SIGRTMIN+1
 #define TEXTDIR "text/"
 #define DATDIR "dat/"
 #define LEE 1
@@ -142,7 +142,7 @@ void cajero(int id){
     //dinero_sacado[id] = true;
     while(fgets(price, sizeof(price), fp)){
         p = atof(price);
-        sleep((int) randNum(1, 3));
+        //sleep((int) randNum(1, 3));
         while(down_semaforo(mutex_hijo, id, IPC_NOWAIT));
         if(ERROR == (p = increase_subtotal(filename_caja, p))){
             fprintf(stderr, "Cannot open file\n");
