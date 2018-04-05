@@ -64,7 +64,7 @@ int down_semaforo(int semid, int num_sem, int undo){
     return retorno;
 }
 
-int downMultiple_semaforo(int semid, int size, int undo, int *active){
+int down_multiple_semaforo(int semid, int size, int undo, int *active){
     int retorno, i;
     struct sembuf *sops = NULL;
     if(!active){
@@ -77,7 +77,7 @@ int downMultiple_semaforo(int semid, int size, int undo, int *active){
     for (i = 0; i < size; ++i) {
         sops[i].sem_num = active[i];
         sops[i].sem_op = -1;
-        sops[i].sem_flg = undo;
+        sops[i].sem_flg = undo | SEM_UNDO;
     }
     retorno = semop(semid, sops, size);
     (retorno == -1) ? retorno = ERROR : OK;
@@ -96,7 +96,7 @@ int up_semaforo(int semid, int num_sem, int undo){
     return retorno;
 }
 
-int upMultiple_semaforo(int semid, int size, int undo, int *active){
+int up_multiple_semaforo(int semid, int size, int undo, int *active){
     int retorno, i;
     struct sembuf *sops = NULL;
     if(!active){
@@ -109,7 +109,7 @@ int upMultiple_semaforo(int semid, int size, int undo, int *active){
     for (i = 0; i < size; ++i) {
         sops[i].sem_num = active[i];
         sops[i].sem_op = 1;
-        sops[i].sem_flg = undo;
+        sops[i].sem_flg = undo | SEM_UNDO;
     }
     retorno = semop(semid, sops, size);
     (retorno == -1) ? retorno = ERROR : OK;

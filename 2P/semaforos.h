@@ -61,7 +61,7 @@ abrupta.
 Salida:
 int: OK si todo fue correcto, ERROR en caso de error.
 ***************************************************************/
-int downMultiple_semaforo(int semid, int size, int undo, int *active);
+int down_multiple_semaforo(int semid, int size, int undo, int *active);
 /**************************************************************
 Nombre:Up_Semaforo
 Descripcion: Sube el semaforo indicado
@@ -87,6 +87,6 @@ abrupta.
 Salida:
 int: OK si todo fue correcto, ERROR en caso de error.
 ***************************************************************/
-int upMultiple_semaforo(int semid, int size, int undo, int *active);
+int up_multiple_semaforo(int semid, int size, int undo, int *active);
 
 #endif

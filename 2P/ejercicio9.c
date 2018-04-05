@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <sys/ipc.h>
-#include <sys/mman.h>
+#include <sys/sem.h>
 #include <errno.h>
 #include <string.h>
 #include <signal.h>
@@ -16,7 +15,7 @@
 #define NUM_OPER 15
 #define KEY 2018
 #define PATH "/bin/bash"
-#define SIGMONEY SIGRTMIN+0
+#define SIGMONEY SIGRTMIN
 #define SIGDONE SIGRTMIN+1
 #define TEXTDIR "text/"
 #define DATDIR "dat/"
@@ -24,7 +23,6 @@
 #define ESCRIBE 0
 
 static volatile int mutex_hijo, terminados;
-//static volatile bool dinero_sacado[NUM_CAJ];
 static volatile float cuenta = 0;
 
 /* Aumenta el total del archivo dato con el arguento delta */
@@ -73,14 +71,14 @@ void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
     caja = info->si_int;
     printf("He entrado en SIGMONEY desde la caja %d\n", caja);
     sprintf(filename, DATDIR "caja%d.dat", caja+1);
-    while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
+    down_semaforo(mutex_hijo, caja, SEM_UNDO);
     if(ERROR == increase_subtotal(filename, -900)){
         fprintf(stderr, "Cannot open file\n");
     };
     cuenta += 900;
     printf("%f\n", cuenta);
     saca_dinero(filename, true, ESCRIBE);
-    while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
+    up_semaforo(mutex_hijo, caja, SEM_UNDO);
     return;
 }
 
@@ -93,7 +91,6 @@ void handle_SIGDONE(int sig, siginfo_t *info, void *vp){
     caja = info->si_int;
     printf("He entrado en SIGDONE desde la caja %d\n", caja);
     sprintf(filename, DATDIR "caja%d.dat", caja+1);
-    //while(ERROR == down_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     fp = fopen(filename, "r+");
     fread(&dinero, sizeof(float), 1,fp);
     cuenta += dinero;
@@ -101,7 +98,6 @@ void handle_SIGDONE(int sig, siginfo_t *info, void *vp){
     fseek(fp, 0, SEEK_SET);
     fwrite(&dinero, sizeof(float), 1, fp);
     fclose(fp);
-    //while(ERROR == up_semaforo(mutex_hijo, caja, IPC_NOWAIT));
     terminados++;
 }
 
@@ -139,11 +135,10 @@ void cajero(int id){
     /* Rellena el entero que enviaremos con sigqueue */
     val.sival_int = id;
 
-    //dinero_sacado[id] = true;
     while(fgets(price, sizeof(price), fp)){
         p = atof(price);
-        //sleep((int) randNum(1, 3));
-        while(down_semaforo(mutex_hijo, id, IPC_NOWAIT));
+        sleep((int) randNum(1, 3));
+        down_semaforo(mutex_hijo, id, SEM_UNDO);
         if(ERROR == (p = increase_subtotal(filename_caja, p))){
             fprintf(stderr, "Cannot open file\n");
         };
@@ -153,7 +148,7 @@ void cajero(int id){
             saca_dinero(filename_caja, false, ESCRIBE);
         }
         printf("DEBUG PURPOSE: Mi booleano es: %d from id %d\n", booleano, val.sival_int);
-        while(up_semaforo(mutex_hijo, id, IPC_NOWAIT));
+        up_semaforo(mutex_hijo, id, SEM_UNDO);
     }
     printf("DEBUG PURPOSE: He terminado con id: %d\n", val.sival_int);
     sigqueue(getppid(), SIGDONE, val);
