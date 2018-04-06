@@ -36,7 +36,7 @@ static volatile int mutex_hijo, terminados;
 static volatile float cuenta = 0;
 
  /**
-  * @brief Dado un id, procesa todas las transacciones asociadas a él.
+  * @brief Dado un id, procesa todas las transacciones asociadas a el.
   *
   * Abre su fichero de transacciones correspondiente y las va procesando
   * en otro fichero, avisando al padre cuando supere la cantidad estipulada.
