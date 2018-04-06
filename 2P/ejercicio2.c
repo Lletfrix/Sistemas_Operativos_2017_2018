@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 2
+ *
+ * Este fichero contiene el código fuente del ejercicio 2 de la entrega.
+ * @file ejercicio2.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 06-04-2018
+ */
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +15,7 @@
 #include <errno.h>
 #include <string.h>
 
-#define MAX_HIJOS 4
+#define MAX_HIJOS 4 /*!< Numero maximo de hijos */
 
 void main(){
     int i, id;

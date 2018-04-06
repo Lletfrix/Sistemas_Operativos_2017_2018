@@ -1,3 +1,12 @@
+/**
+ * @brief Funciones personales acerca de semaforos. Implementacion.
+ *
+ * Este fichero contiene el código fuente de las funciones en la interfaz semaforos.h.
+ * @file semaforos.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 06-04-2018
+ */
 #include <sys/sem.h>
 #include <sys/types.h>
 #include <stdlib.h>

@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 6a
+ *
+ * Este fichero contiene el código fuente del ejercicio 6a de la entrega.
+ * @file ejercicio6a.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 06-04-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,8 +19,8 @@
 
 #include "mysignal.h"
 
-#define NUM_PROC 5
-#define SECS 40
+#define NUM_PROC 5 /*!< Numero de iteraciones del contador*/
+#define SECS 40 /*!< Numero de segundos*/
 
 int main (void){
     sigset_t set, unset, oset;

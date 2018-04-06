@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 4
+ *
+ * Este fichero contiene el código fuente del ejercicio 4 de la entrega.
+ * @file ejercicio4.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 06-04-2018
+ */
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,21 +17,24 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-#define NUM_ITER 10
+#define NUM_ITER 10 /*!< Numero de iteraciones */
 
-void manejador_SIGUSR1(int sig){
-    return;
-}
+/**
+ * @brief Comprueba si una string es numerica.
+ *
+ * Comprueba si cada caracter de la cadena string es un valor numerico.
+ *
+ * @param string Cadena de caracteres.
+ * @return Devuelve true si la cadena es numerica, false si no lo es.
+ */
+bool aredigits(char *string);
 
-bool aredigits(char *string){
-    int i;
-    for(i = 0; i < strlen(string); ++i){
-        if (!isdigit(string[i])){
-            return false;
-        }
-    }
-    return true;
-}
+/**
+ * @brief Manejador asociado a la señal SIGUSR1
+ *
+ * @param sig Señal recibida.
+ */
+void manejador_SIGUSR1(int sig);
 
 void main(int argc, char* argv[]){
     int len, i, j, num, pid, last_pid;
@@ -58,7 +70,7 @@ void main(int argc, char* argv[]){
                 printf("Soy %d y estoy trabajando\n", getpid());
                 sleep(1);
                 j++;
-                if(j == 10){
+                if(j == NUM_ITER){
                     kill(getppid(), SIGUSR1);
                 }
             }
@@ -71,4 +83,18 @@ void main(int argc, char* argv[]){
     kill(last_pid, SIGTERM);
     while (wait(NULL) != -1);
     exit(EXIT_SUCCESS);
+}
+
+void manejador_SIGUSR1(int sig){
+    return;
+}
+
+bool aredigits(char *string){
+    int i;
+    for(i = 0; i < strlen(string); ++i){
+        if (!isdigit(string[i])){
+            return false;
+        }
+    }
+    return true;
 }

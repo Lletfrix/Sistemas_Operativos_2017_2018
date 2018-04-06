@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 6b
+ *
+ * Este fichero contiene el código fuente del ejercicio 6b de la entrega.
+ * @file ejercicio6b.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 06-04-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,13 +17,15 @@
 #include <errno.h>
 #include <ctype.h>
 
-#define NUM_PROC 5
-#define SECS 10
+#define NUM_PROC 5 /*!< Numero de iteraciones del contador*/
+#define SECS 40 /*!< Numero de segundos*/
 
-void manejador_SIGTERM(int sig){
-    printf("Soy %d y he recibido la señal SIGTERM\n", getpid());
-    exit(EXIT_SUCCESS);
-}
+/**
+ * @brief Manejador asociado a la señal SIGTERM
+ *
+ * @param sig Señal recibida.
+ */
+void manejador_SIGTERM(int sig);
 
 int main (void){
     void manejador_SIGTERM();
@@ -32,7 +43,12 @@ int main (void){
             sleep(3);
         }
     }
-    sleep(40);
+    sleep(SECS);
     kill(pid, SIGTERM);
     while(wait(NULL)>0);
+}
+
+void manejador_SIGTERM(int sig){
+    printf("Soy %d y he recibido la señal SIGTERM\n", getpid());
+    exit(EXIT_SUCCESS);
 }

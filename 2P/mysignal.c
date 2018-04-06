@@ -1,3 +1,12 @@
+/**
+ * @brief Funciones personales acercas de señales. Implementacion de mysignal.h.
+ *
+ * Este fichero contiene el código fuente de las funciones en la interfaz mysignal.h.
+ * @file mysignal.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 06-04-2018
+ */
 #include <signal.h>
 #include <stdarg.h>
 
