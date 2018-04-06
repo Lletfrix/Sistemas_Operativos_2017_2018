@@ -245,7 +245,6 @@ void handle_SIGMONEY(int sig, siginfo_t *info, void *vp){
         fprintf(stderr, "Cannot open file\n");
     };
     cuenta += 900;
-    printf("%f\n", cuenta);
     dinero_recogido(filename, true, ESCRIBE);
     up_semaforo(mutex_hijo, caja, SEM_UNDO);
     return;

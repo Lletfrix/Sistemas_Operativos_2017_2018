@@ -17,7 +17,7 @@ all : $(EXE)
 .PHONY : clean
 clean :
 	rm -f build/*.o core $(EXE)
-	rm -f text/*.txt dat/*.dat
+	rm -f text/*.txt dat/*.dat *.zip
 	rm -rf html/ latex/
 .PHONY : doc
 doc :
