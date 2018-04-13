@@ -100,13 +100,13 @@ int main(int argc, char const *argv[]) {
         perror("Error al inicializar el semaforo");
     }
 
+    val[0]=LET+NUM;
     if(ERROR == inicializar_semaforo(vacio, val)){
         perror("Error al inicializar el semaforo");
     }
-
-    if(ERROR == inicializar_semaforo(lleno, val)){
+    /*if(ERROR == inicializar_semaforo(lleno, val)){
         perror("Error al inicializar el semaforo");
-    }
+    }*/
 
     pid = fork();
     if(!pid){
@@ -128,17 +128,17 @@ int main(int argc, char const *argv[]) {
 }
 
 void productor(){
-    int ind = 0;
+    //int ind = 0;
     int i;
-    for(i = (int)'A'; i < LET + (int)'A'; i++){
+    for(i = 0; i < LET;){
         if (ERROR == down_semaforo(vacio, 0, SEM_UNDO)){
             perror("Error al bajar el semaforo vacio");
         }
         if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
             perror("Error al bajar el semaforo semshm");
         }
-        buff->p[ind] = (char)i;
-        ++ind;
+        buff->p[i] = (char) i + 'A';
+        ++i;
         if (ERROR == up_semaforo(semshm, 0, SEM_UNDO)){
             perror("Error al subir el semaforo semshm");
         }
@@ -146,15 +146,15 @@ void productor(){
             perror("Error al subir el semaforo lleno");
         }
     }
-    for(i = (int)'0'; i < NUM + (int)'0'; i++){
+    for(i = LET; i < LET + NUM;){
         if (ERROR == down_semaforo(vacio, 0, SEM_UNDO)){
             perror("Error al bajar el semaforo vacio");
         }
         if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
             perror("Error al bajar el semaforo semshm");
         }
-        buff->p[ind] = (char)i;
-        ++ind;
+        buff->p[i] = (char) i - LET + '0';
+        ++i;
         if (ERROR == up_semaforo(semshm, 0, SEM_UNDO)){
             perror("Error al subir el semaforo semshm");
         }
@@ -167,17 +167,17 @@ void productor(){
 }
 
 void consumidor(){
-    int ind = 0;
+    //int ind = 0;
     int i;
-    for(i = 0; i < LET+NUM; i++){
+    for(i = 0; i < LET+NUM;){
         if (ERROR == down_semaforo(lleno, 0, SEM_UNDO)){
             perror("Error al bajar el semaforo lleno");
         }
         if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
             perror("Error al bajar el semaforo semshm");
         }
-        printf("Producto obtenido : %c\n", buff->p[ind]);
-        ++ind;
+        printf("Producto obtenido : %c\n", buff->p[i]);
+        ++i;
         if (ERROR == up_semaforo(semshm, 0, SEM_UNDO)){
             perror("Error al subir el semaforo semshm");
         }

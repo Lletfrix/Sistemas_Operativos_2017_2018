@@ -141,13 +141,12 @@ void handle_SIGUSR1(int sig){
 }
 
 void rutina_hijo(){
-    //char nombre[80];
     sleep((int) randNum(1, 6));
     if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
         perror("Error al bajar el semaforo semshm");
     }
     printf("Soy %d y voy a leer tu nombre:\n", getpid());
-    fgets(buff->nombre, 80, stdin);
+    fgets(buff->nombre, MAX_NOMBRE, stdin);
     buff->nombre[strcspn(buff->nombre, "\n")] = 0;
     buff->id++;
     kill(getppid(), SIGUSR1);
