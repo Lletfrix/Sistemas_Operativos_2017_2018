@@ -33,7 +33,7 @@ void productor();
 void consumidor();
 
 int main(int argc, char const *argv[]) {
-    key_t key1, key2;
+    key_t key1, key2, key3, key4;
     int mem, i;
     pid_t pid;
     unsigned short val[1];
@@ -44,6 +44,16 @@ int main(int argc, char const *argv[]) {
     }
 
     if((key2 = ftok(PATH, KEY2)) == -1){
+        perror("Fallo ftok");
+        exit(EXIT_FAILURE);
+    }
+
+    if((key3 = ftok(PATH, KEY3)) == -1){
+        perror("Fallo ftok");
+        exit(EXIT_FAILURE);
+    }
+
+    if((key4 = ftok(PATH, KEY4)) == -1){
         perror("Fallo ftok");
         exit(EXIT_FAILURE);
     }
