@@ -19,6 +19,8 @@
 #define NUM 10
 #define KEY1 1300
 #define KEY2 1400
+#define KEY3 1500
+#define KEY4 1600
 #define PATH "/bin/bash"
 
 typedef struct productos{
@@ -74,7 +76,7 @@ int main(int argc, char const *argv[]) {
         borrar_semaforo(vacio);
     }
 
-    mem = shmget(key4, sizeof(Info), SHM_W|SHM_R|IPC_CREAT);
+    mem = shmget(key4, sizeof(Productos), SHM_W|SHM_R|IPC_CREAT);
     if(mem == -1){
         perror("Error generando memoria compartida");
         borrar_semaforo(semshm);
@@ -117,7 +119,7 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    while(wait() != -1);
+    while(wait(NULL) != -1);
     shmdt(buff);
     shmctl(mem, IPC_RMID, NULL);
     borrar_semaforo(semshm);
@@ -174,7 +176,7 @@ void consumidor(){
         if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
             perror("Error al bajar el semaforo semshm");
         }
-        printf("Producto obtenido : %c", buff->p[ind]);
+        printf("Producto obtenido : %c\n", buff->p[ind]);
         ++ind;
         if (ERROR == up_semaforo(semshm, 0, SEM_UNDO)){
             perror("Error al subir el semaforo semshm");
