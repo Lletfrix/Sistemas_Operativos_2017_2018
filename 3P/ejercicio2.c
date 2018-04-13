@@ -13,9 +13,10 @@
 
 #define KEY 1300
 #define PATH "/bin/bash"
+#define MAX_NOMBRE 80
 
 typedef struct info {
-    char nombre[80];
+    char nombre[MAX_NOMBRE];
     int id;
 } Info;
 
