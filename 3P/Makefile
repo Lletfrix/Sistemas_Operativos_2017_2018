@@ -5,11 +5,11 @@
 CC = gcc
 CFLAGS = -g
 LDLIBS = -lm -pthread
-EXE = ejercicio2 ejercicio2_solved ejercicio3
+EXE = ejercicio2 ejercicio2_solved ejercicio3 ejercicio4
 LIBS = mylib semaforos
 LIB_DIR = build/lib
 BUILD_DIR = build
-ZIP_NAME=G2202_P6_2
+ZIP_NAME=G2202_P6_3
 DIST_PATH=./*
 
 all : $(EXE)
