@@ -1,3 +1,12 @@
+/**
+ * @brief Funciones comunes al ejercicio 2
+ *
+ * Este fichero contiene las funciones comunes al ejercicio 2.
+ * @file ejercicio2_lib.h
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 15-04-2018
+ */
 #ifndef EJERCICIO2_LIB
 #define EJERCICIO2_LIB
 
