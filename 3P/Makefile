@@ -28,17 +28,17 @@ doc :
 	doxygen Doxyfile
 
 $(EJ2) : $(LIBS) ejercicio2_lib
-	@echo "#---------------------------"
-	@echo "# Generando $@ "
+	@echo "\033[97m#---------------------------\033[0m"
+	@echo "\033[90m# Generando $@ "
 	@echo "# Depende de $^"
-	@echo "# Ha cambiado $<"
+	@echo "# Ha cambiado $<\033[0m"
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$@ $@.c $(OBJECTS) $(LDLIBS)
 
 $(EJGEN) : $(LIBS)
-	@echo "#---------------------------"
-	@echo "# Generando $@ "
+	@echo "\033[97m#---------------------------\033[0m"
+	@echo "\033[90m# Generando $@ "
 	@echo "# Depende de $^"
-	@echo "# Ha cambiado $<"
+	@echo "# Ha cambiado $<\033[0m"
 	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$@ $@.c $(OBJECTS) $(LDLIBS)
 
 
@@ -52,19 +52,46 @@ dist:
 
 .PHONY: memtest
 memtest: $(EXE)
-	valgrind --leak-check=full ./build/ejercicio2 2
-	valgrind --leak-check=full ./build/ejercicio2_solved 2
+
+	@echo "\033[93mEjecutando Ejercicio 2 con Valgrind"
+	@echo "#---------------------------"
+	valgrind --leak-check=full ./build/ejercicio2 3
+	@echo "\033[94mEjecutando Ejercicio 2_solved con Valgrind"
+	@echo "#---------------------------"
+	valgrind --leak-check=full ./build/ejercicio2_solved 3
+	@echo "\033[95mEjecutando Ejercicio 3 con Valgrind"
+	@echo "#---------------------------"
 	valgrind --leak-check=full ./build/ejercicio3
+	@echo "\033[96mEjecutando Ejercicio 4 con Valgrind"
+	@echo "#---------------------------"
 	valgrind --leak-check=full ./build/ejercicio4 "comma_separated.txt"
-	valgrind --leak.check=full ./build/ejercicio5 "sample.txt" "out.txt"
+	@echo "\033[91mEjecutando Ejercicio 5 con Valgrind"
+	@echo "#---------------------------"
+	valgrind --leak-check=full ./build/ejercicio5 "sample.txt" "out.txt"
+	@echo "\033[0m"
 
 .PHONY: test
 test: $(EXE)
-	./build/ejercicio2 2
-	./build/ejercicio2_solved 2
+	@echo "\033[93mEjecutando Ejercicio 2"
+	@echo "#---------------------------"
+	./build/ejercicio2 3
+	@echo "\033[94mEjecutando Ejercicio 2_solved"
+	@echo "#---------------------------"
+	./build/ejercicio2_solved 3
+	@echo "\033[95mEjecutando Ejercicio 3"
+	@echo "#---------------------------"
 	./build/ejercicio3
+	@echo "\033[96mEjecutando Ejercicio 4"
+	@echo "#---------------------------"
 	./build/ejercicio4 "comma_separated.txt"
+	@echo "\033[91mEjecutando Ejercicio 5"
+	@echo "#---------------------------"
 	./build/ejercicio5 "sample.txt" "out.txt"
+	@echo "\033[0m"
+	@echo "--> Imprimiendo sample.txt"
+	@cat sample.txt
+	@echo "--> Imprimiendo out.txt"
+	@cat out.txt
 
 .PHONY: loremipsum
 loremipsum: $(EJGEN)
