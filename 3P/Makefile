@@ -5,7 +5,7 @@
 CC = gcc
 CFLAGS = -g
 LDLIBS = -lm -pthread
-EXE = ejercicio2 ejercicio2_solved ejercicio3 ejercicio4
+EXE = ejercicio2 ejercicio2_solved ejercicio3 ejercicio4 ejercicio5
 LIBS = mylib semaforos
 LIB_DIR = build/lib
 BUILD_DIR = build
