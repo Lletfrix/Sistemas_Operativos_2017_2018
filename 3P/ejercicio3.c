@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 3
+ *
+ * Este fichero contiene el código fuente del ejercicio 5 de la entrega.
+ * @file ejercicio3.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 14-04-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -15,23 +24,40 @@
 #include "mylib.h"
 #include "semaforos.h"
 
-#define LET 26
-#define NUM 10
-#define KEY1 1300
-#define KEY2 1400
-#define KEY3 1500
-#define KEY4 1600
-#define PATH "/bin/bash"
+#define LET 26 /*!< Numero de letras en ascii*/
+#define NUM 10 /*!< Numero de números en ascii*/
+#define KEY1 1300 /*!< Numero para generar una key con ftok*/
+#define KEY2 1400 /*!< Numero para generar una key con ftok*/
+#define KEY3 1500 /*!< Numero para generar una key con ftok*/
+#define KEY4 1600 /*!< Numero para generar una key con ftok*/
+#define PATH "/bin/bash" /*!< Path para generar una key con ftok*/
 
+/**
+* @brief Array de productos
+*
+* Array de chars en los que se guardarán y leeran los productos
+*/
 typedef struct productos{
-    char p[LET+NUM];
+    char p[LET+NUM]; /*!< Array de productos*/
 } Productos;
 
-Productos *buff = NULL;
-int semshm, vacio, lleno;
+Productos *buff = NULL; /*!< Variable global donde se guardan los productos*/
+int semshm /*!< Controla el acceso a la memoria compartida*/;
+int vacio /*!< Controla que el productor no produzca si el sitio esta lleno*/;
+int lleno /*!< Controla que el consumidor no consuma si el sitio esta vacio*/;
 
+/**
+ * @brief Rutina que sigue el proceso indicado como productor
+ *
+ * Genera todas las letras y números del ascii en la memoria compartida
+ */
 void productor();
 
+/**
+ * @brief Rutina que sigue el proceso indicado como consumidor.
+ *
+ * Lee e imprime los caracteres escritos por el productor en la memoria compartida
+ */
 void consumidor();
 
 int main(int argc, char const *argv[]) {
@@ -104,10 +130,6 @@ int main(int argc, char const *argv[]) {
     if(ERROR == inicializar_semaforo(vacio, val)){
         perror("Error al inicializar el semaforo");
     }
-    /*if(ERROR == inicializar_semaforo(lleno, val)){
-        perror("Error al inicializar el semaforo");
-    }*/
-
     pid = fork();
     if(!pid){
         productor();
@@ -118,47 +140,46 @@ int main(int argc, char const *argv[]) {
         consumidor();
         exit(EXIT_FAILURE);
     }
-
     while(wait(NULL) != -1);
     shmdt(buff);
     shmctl(mem, IPC_RMID, NULL);
     borrar_semaforo(semshm);
+    borrar_semaforo(vacio);
+    borrar_semaforo(lleno);
     exit(EXIT_SUCCESS);
-
 }
 
 void productor(){
-    //int ind = 0;
     int i;
     for(i = 0; i < LET;){
-        if (ERROR == down_semaforo(vacio, 0, SEM_UNDO)){
+        if (ERROR == down_semaforo(vacio, 0, 0)){
             perror("Error al bajar el semaforo vacio");
         }
-        if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
+        if (ERROR == down_semaforo(semshm, 0, 0)){
             perror("Error al bajar el semaforo semshm");
         }
         buff->p[i] = (char) i + 'A';
         ++i;
-        if (ERROR == up_semaforo(semshm, 0, SEM_UNDO)){
+        if (ERROR == up_semaforo(semshm, 0, 0)){
             perror("Error al subir el semaforo semshm");
         }
-        if (ERROR == up_semaforo(lleno, 0, SEM_UNDO)){
+        if (ERROR == up_semaforo(lleno, 0, 0)){
             perror("Error al subir el semaforo lleno");
         }
     }
     for(i = LET; i < LET + NUM;){
-        if (ERROR == down_semaforo(vacio, 0, SEM_UNDO)){
+        if (ERROR == down_semaforo(vacio, 0, 0)){
             perror("Error al bajar el semaforo vacio");
         }
-        if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
+        if (ERROR == down_semaforo(semshm, 0, 0)){
             perror("Error al bajar el semaforo semshm");
         }
         buff->p[i] = (char) i - LET + '0';
         ++i;
-        if (ERROR == up_semaforo(semshm, 0, SEM_UNDO)){
+        if (ERROR == up_semaforo(semshm, 0, 0)){
             perror("Error al subir el semaforo semshm");
         }
-        if (ERROR == up_semaforo(lleno, 0, SEM_UNDO)){
+        if (ERROR == up_semaforo(lleno, 0, 0)){
             perror("Error al subir el semaforo lleno");
         }
     }
@@ -170,18 +191,18 @@ void consumidor(){
     //int ind = 0;
     int i;
     for(i = 0; i < LET+NUM;){
-        if (ERROR == down_semaforo(lleno, 0, SEM_UNDO)){
+        if (ERROR == down_semaforo(lleno, 0, 0)){
             perror("Error al bajar el semaforo lleno");
         }
-        if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
+        if (ERROR == down_semaforo(semshm, 0, 0)){
             perror("Error al bajar el semaforo semshm");
         }
         printf("Producto obtenido : %c\n", buff->p[i]);
         ++i;
-        if (ERROR == up_semaforo(semshm, 0, SEM_UNDO)){
+        if (ERROR == up_semaforo(semshm, 0, 0)){
             perror("Error al subir el semaforo semshm");
         }
-        if (ERROR == up_semaforo(vacio, 0, SEM_UNDO)){
+        if (ERROR == up_semaforo(vacio, 0, 0)){
             perror("Error al subir el semaforo vacio");
         }
     }

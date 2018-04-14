@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 2 Solved
+ *
+ * Este fichero contiene el código fuente del ejercicio 2 de la entrega.
+ * @file ejercicio2_solved.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 14-04-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -14,26 +23,26 @@
 
 #include "mylib.h"
 #include "semaforos.h"
+#include "ejercicio2_lib.h"
 
-#define KEY1 1300
-#define KEY2 1400
-#define KEY3 1500
-#define PATH "/bin/bash"
-#define MAX_NOMBRE 80
-
-typedef struct info {
-    char nombre[MAX_NOMBRE];
-    int id;
-} Info;
-
+/**
+ * @brief Manejador de SIGUSR1
+ *
+ * Imprime el nombre y el id del usuario en la memoria compartida a la recepcion
+ * de SIGUSR1. Levanta el semaforo.
+ */
 void handle_SIGUSR1(int sig);
 
+/**
+ * @brief Rutina que sigue el proceso hijo
+ *
+ * Duerme al comienzo, reserva el recurso del input y la memoria, lee de teclado
+ * y envía SIGUSR1 al padre.
+ */
 void rutina_hijo();
 
-void usage();
-
-Info *buff = NULL;
-int semio, semshm;
+Info *buff = NULL; /*!< Variable global donde se guarda la informacion de usuario*/
+int semshm; /*!< Semaforo para proteger el recurso*/
 
 int main(int argc, char const *argv[]) {
     int mem, n, i;
@@ -68,22 +77,14 @@ int main(int argc, char const *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-
-    if(ERROR == crear_semaforo(key1, 1, &semio)){
-        perror("Error creando semaforo");
-        exit(EXIT_FAILURE);
-    }
-
     if(ERROR == crear_semaforo(key2, 1, &semshm)){
         perror("Error creando semaforo");
-        borrar_semaforo(semio);
         exit(EXIT_FAILURE);
     }
 
     mem = shmget(key3, sizeof(Info), SHM_W|SHM_R|IPC_CREAT);
     if(mem == -1){
         perror("Error generando memoria compartida");
-        borrar_semaforo(semio);
         borrar_semaforo(semshm);
         exit(EXIT_FAILURE);
     }
@@ -91,7 +92,6 @@ int main(int argc, char const *argv[]) {
     buff = shmat(mem, NULL, 0);
     if(buff == (void *) -1){
         perror("Error añadiendo la memoria");
-        borrar_semaforo(semio);
         borrar_semaforo(semshm);
         shmctl(mem, IPC_RMID, NULL);
         exit(EXIT_FAILURE);
@@ -105,7 +105,6 @@ int main(int argc, char const *argv[]) {
 
     if(signal(SIGUSR1, handle_SIGUSR1) == SIG_ERR){
         perror("Error asignando el manejador");
-        borrar_semaforo(semio);
         borrar_semaforo(semshm);
         shmdt(buff);
         shmctl(mem, IPC_RMID, NULL);
@@ -127,7 +126,6 @@ int main(int argc, char const *argv[]) {
     while(wait(NULL) != -1);
     shmdt(buff);
     shmctl(mem, IPC_RMID, NULL);
-    borrar_semaforo(semio);
     borrar_semaforo(semshm);
     exit(EXIT_SUCCESS);
 }
@@ -135,14 +133,14 @@ int main(int argc, char const *argv[]) {
 
 void handle_SIGUSR1(int sig){
     printf("Nombre: %s - Id: %d\n", buff->nombre, buff->id);
-    if(ERROR == up_semaforo(semshm, 0, SEM_UNDO)){
+    if(ERROR == up_semaforo(semshm, 0, 0)){
         perror("Error al hacer up a semshm");
     }
 }
 
 void rutina_hijo(){
     sleep((int) randNum(1, 6));
-    if (ERROR == down_semaforo(semshm, 0, SEM_UNDO)){
+    if (ERROR == down_semaforo(semshm, 0, 0)){
         perror("Error al bajar el semaforo semshm");
     }
     printf("Soy %d y voy a leer tu nombre:\n", getpid());
@@ -152,8 +150,4 @@ void rutina_hijo(){
     kill(getppid(), SIGUSR1);
     shmdt(buff);
     exit(EXIT_SUCCESS);
-}
-
-void usage(){
-    printf("Usage is: ./build/ejercicio2 <integer>\n");
 }

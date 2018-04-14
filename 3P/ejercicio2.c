@@ -1,3 +1,12 @@
+/**
+ * @brief Ejercicio 2
+ *
+ * Este fichero contiene el código fuente del ejercicio 2 de la entrega.
+ * @file ejercicio2.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 14-04-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -10,23 +19,24 @@
 #include <stdbool.h>
 
 #include "mylib.h"
+#include "ejercicio2_lib.h"
 
-#define KEY 1300
-#define PATH "/bin/bash"
-#define MAX_NOMBRE 80
-
-typedef struct info {
-    char nombre[MAX_NOMBRE];
-    int id;
-} Info;
-
+/**
+ * @brief Manejador de SIGUSR1
+ *
+ * Imprime el nombre y el id del usuario en la memoria compartida a la recepcion
+ * de SIGUSR1.
+ */
 void handle_SIGUSR1(int sig);
 
+/**
+ * @brief Rutina que sigue el proceso hijo
+ *
+ * Duerme al comienzo, lee de teclado y envía SIGUSR1 al padre.
+ */
 void rutina_hijo();
 
-void usage();
-
-Info *buff = NULL;
+Info *buff = NULL; /*!< Variable global donde se guarda la informacion de usuario*/
 
 int main(int argc, char const *argv[]) {
     int mem, n, i;
@@ -45,7 +55,7 @@ int main(int argc, char const *argv[]) {
 
     n = atoi(argv[1]);
 
-    if((key = ftok(PATH, KEY)) == -1){
+    if((key = ftok(PATH, KEY1)) == -1){
         perror("Fallo ftok");
         exit(EXIT_FAILURE);
     }
@@ -101,8 +111,4 @@ void rutina_hijo(){
     shmdt(buff);
     kill(getppid(), SIGUSR1);
     exit(EXIT_SUCCESS);
-}
-
-void usage(){
-    printf("Usage is: ./build/ejercicio2 <integer>\n");
 }
