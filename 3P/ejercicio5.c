@@ -83,20 +83,16 @@ int main(int argc, char *argv[]) {
         perror("Error al crear la cola de mensajes");
         exit(EXIT_FAILURE);
     }
-    printf("%d\n", qid);
     for(i = 0; i < NUM_PROC; ++i){
         if(!(pid = fork())){
             switch (i) {
                 case 0:
-                    printf("Soy A: %d\n", getpid());
                     a(argv[1]);
                     exit(EXIT_FAILURE);
                 case 1:
-                    printf("Soy B: %d\n", getpid());
                     b(pid_aux);
                     exit(EXIT_FAILURE);
                 case 2:
-                    printf("Soy C: %d\n", getpid());
                     c(argv[2], pid_aux);
                     exit(EXIT_FAILURE);
                 default:
@@ -143,7 +139,6 @@ void b(pid_t pid_aux){
             errno = !ENOMSG;
             continue;
         }
-        printf("El mensaje recibido por B es de tipo: %ld\n", mensaje.mtype);
         mensaje.mtype = 2;
         shift_letras(mensaje.texto);
         if(-1 == msgsnd(qid,(struct msgbuf *)  &mensaje, MAX_MEM/sizeof(char), 0)){
@@ -167,7 +162,6 @@ void c(char *f_out, pid_t pid_aux){
             errno = !ENOMSG;
             continue;
         }
-        printf("El mensaje recibido por C es de tipo: %ld\n", mensaje.mtype);
         fprintf(fp, "%s", mensaje.texto);
     }
     fclose(fp);
