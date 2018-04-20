@@ -68,8 +68,6 @@ struct message{
     char texto[MAX_MEM/sizeof(char)]; /*!< Información del mensaje*/
 };
 
-static volatile short a_is_running = 1;
-static volatile short b_is_running = 1;
 static int qid;
 
 int main(int argc, char *argv[]) {
