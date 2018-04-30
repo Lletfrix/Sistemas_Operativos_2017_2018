@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "apuesta.h"
 #include "apostador.h"
 #include "caballo.h"
+#include "apuesta.h"
 
 struct _apuesta{
     Apostador *apos;
@@ -12,10 +12,10 @@ struct _apuesta{
     double cantidad;
 };
 
-void _apuesta_print(FILE *, Apuesta *);
+void _apuesta_print(FILE *, Apuesta *, double);
 
 Apuesta *apuesta_new(){
-    return calloc(1, Apuesta *);
+    return calloc(1, sizeof(Apuesta));
 }
 
 void apuesta_destroy(Apuesta *a){
@@ -39,7 +39,7 @@ void apuesta_execute(FILE* fp, Apuesta *a){
     apos_set_ben(a->apos, cab_get_cot(a->c)*a->cantidad);
     apuesta_total += a->cantidad;
     cab_incr_apostado(a->c, a->cantidad);
-    cab_set_cot(a->c, apuesta_total/cab_get_apostado(c));
+    cab_set_cot(a->c, apuesta_total/cab_get_apostado(a->c));
     _apuesta_print(fp, a, old_cot);
 }
 
@@ -47,5 +47,5 @@ void _apuesta_print(FILE *fp, Apuesta *a, double old_cot){
     if(!fp || !a){
         return;
     }
-    fprintf(fp, "Apostador: %s, Ventanilla: %hu, Caballo: %hu, Cotizacion: %lf, Cantidad %lf\n", apos_get_name(a->apostador),a->ventanilla, cab_get_id(a->c), old_cot, a->cantidad);
+    fprintf(fp, "Apostador: %s, Ventanilla: %hu, Caballo: %hu, Cotizacion: %lf, Cantidad %lf\n", apos_get_name(a->apos),a->ventanilla, cab_get_id(a->c), old_cot, a->cantidad);
 }
