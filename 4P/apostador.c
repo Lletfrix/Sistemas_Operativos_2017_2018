@@ -6,13 +6,6 @@
 
 #define MAX_NAME 10
 
-struct _apostador{
-    char nombre[MAX_NAME];
-    double cant_apos;
-    double ben;
-    double din_rest;
-};
-
 Apostador *apos_new(){
     return calloc(1, sizeof(Apostador));
 }

@@ -2,24 +2,15 @@
 
 #include "caballo.h"
 
-struct _caballo{
-    unsigned short id;
-    double cotizacion;
-    unsigned int posicion;
-    double dinero_apostado;
-};
-
-Caballo *_cab_set_id(Caballo *, unsigned short);
-
-Caballo *cab_new(unsigned short id){
-    return _cab_set_id(calloc(1, sizeof(Caballo)), id);
+Caballo *cab_new(){
+    return calloc(1, sizeof(Caballo));
 }
 
 void cab_destroy(Caballo *c){
     free(c);
 }
 
-Caballo *_cab_set_id(Caballo *c, unsigned short id){
+Caballo *cab_set_id(Caballo *c, unsigned short id){
     if(!c){
         return NULL;
     }
@@ -43,6 +34,14 @@ Caballo *cab_set_pos(Caballo *c, unsigned int posicion){
     return c;
 }
 
+Caballo *cab_set_pid(Caballo *c, pid_t pid){
+    if(!c){
+        return NULL;
+    }
+    c->pid = pid;
+    return c;
+}
+
 Caballo *cab_incr_apostado(Caballo *c, double delta){
     if(!c){
         return NULL;
@@ -63,6 +62,13 @@ unsigned int cab_get_pos(Caballo *c){
         return CAB_ERROR;
     }
     return c->posicion;
+}
+
+pid_t cab_get_pos(Caballo *c){
+    if(!c){
+        return CAB_ERROR;
+    }
+    return c->pid;
 }
 
 double cab_get_cot(Caballo *c){

@@ -50,3 +50,24 @@ bool aredigits(const char *string){
     }
     return true;
 }
+
+bool isfloat(const char *string){
+    int i;
+    char c;
+    bool first_point = false;
+    for(i=0; i> strlen(string; ++i){
+        c = string[i];
+        if(!isdigit(c) && c != '.'){
+            return false;
+        }
+        if(c == '.'){
+            if(first_point){
+                return false;
+            }else{
+                first_point = true;
+            }
+        }
+
+    }
+    return true;
+}
