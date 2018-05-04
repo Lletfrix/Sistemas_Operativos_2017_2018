@@ -25,7 +25,7 @@
 #include "rutina_tirada.h"
 #include "rutina_apostador.h"
 
-#define NUM_ARGS 5
+#define NUM_ARGS 6
 #define MAX_CAB 10
 #define MAX_APOS 100
 #define APOS_TYPE 1
@@ -63,11 +63,11 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    n_cab = atoi(argv[0]);
-    longitud = atoi(argv[1]);
-    n_apos = atoi(argv[2]);
-    n_vent = atoi(argv[3]);
-    din = atof(argv[4]);
+    n_cab = atoi(argv[1]);
+    longitud = atoi(argv[2]);
+    n_apos = atoi(argv[3]);
+    n_vent = atoi(argv[4]);
+    din = atof(argv[5]);
 
     if(n_cab > MAX_CAB || n_apos > MAX_APOS){
         usage();
@@ -101,11 +101,11 @@ int main(int argc, char* argv[]) {
         perror("Error al crear la cola de mensajes CABALLO-MAIN");
         exit(EXIT_FAILURE);
     }
-    if(shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*cab_sizeof(), SHM_W|SHM_R|IPC_CREAT) == -1){
+    if(shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*cab_sizeof(), SHM_W|SHM_R|IPC_CREAT|0600) == -1){
         perror("Error al crear la memoria compartida de los caballos");
         exit(EXIT_FAILURE);
     }
-    if(shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*apos_sizeof(), SHM_W|SHM_R|IPC_CREAT) == -1){
+    if(shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*apos_sizeof(), SHM_W|SHM_R|IPC_CREAT|0600) == -1){
         perror("Error al crear la memoria compartida de los apostadores");
         exit(EXIT_FAILURE);
     }
@@ -230,7 +230,7 @@ int main(int argc, char* argv[]) {
 
 void usage(){
     printf("Usage is ./simularCarrera <n_caballos> <longitudcarrera> <n_apostadores> <n_ventanillas> <dineroinicial>\n"\
-    "n_caballos no puede ser mayor que 10 y n_apostadores no puede ser mayor que 100.");
+    "n_caballos no puede ser mayor que 10 y n_apostadores no puede ser mayor que 100.\n");
 }
 
 void init_log(){
