@@ -17,6 +17,8 @@ Caballo *cab_set_id(Caballo *, unsigned short);
 
 Caballo *cab_set_pid(Caballo *, pid_t);
 
+Caballo *cab_set_last_tir(Caballo *, unsigned short);
+
 Caballo *cab_incr_apostado(Caballo *, double);
 
 size_t cab_sizeof();

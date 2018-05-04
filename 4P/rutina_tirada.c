@@ -6,13 +6,14 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <stdbool.h>
+
 #include "sim_carr_lib.h"
-#include "mylib.c"
+#include "mylib.h"
 #include "rutina_tirada.h"
 
 void _tirada_handler(int sig);
 
-volatile bool running = true;
+volatile bool running_tirada = true;
 
 void proc_tirada(int id, int **pipe){
     sigset_t set, oldset;
@@ -30,7 +31,7 @@ void proc_tirada(int id, int **pipe){
     sigaddset_var(&set, SIGTHROW, SIGINT, SIGABRT, SIGSTART,-1);
     sigprocmask(SIG_BLOCK, &set, &oldset);
     sigsuspend(&oldset);
-    while(running){
+    while(running_tirada){
         tirada = 0;
         sigsuspend(&oldset);
         read(pipe[id][READ], &tirada_type, sizeof(char));
@@ -65,7 +66,7 @@ void _tirada_handler(int sig){
         case SIGSTART:
             return;
         case SIGINT:
-            running = false;
+            running_tirada = false;
         default:
             return;
     }

@@ -43,4 +43,14 @@ float randNum(float inf, float sup);
  */
 bool aredigits(const char *string);
 
+/**
+ * @brief Comprueba si una string es un float o entero.
+ *
+ * Comprueba si cada caracter de la cadena string es un valor numerico o un punto.
+ *
+ * @param string Cadena de caracteres.
+ * @return Devuelve true si la cadena es un float o entero, false si no lo es.
+ */
+bool isfloat(const char *string);
+
 #endif

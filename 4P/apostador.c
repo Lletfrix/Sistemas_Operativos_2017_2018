@@ -38,6 +38,14 @@ Apostador *apos_set_ben(Apostador *a, double beneficio){
     return a;
 }
 
+Apostador *apos_set_pid(Apostador *a, pid_t pid){
+    if(!a){
+        return NULL;
+    }
+    a->pid = pid;
+    return a;
+}
+
 size_t apos_sizeof(){
     return sizeof(Apostador);
 }
@@ -63,6 +71,12 @@ double apos_get_din_rest(Apostador *a){
     return a->din_rest;
 }
 
+double apos_get_ben(Apostador *a){
+    if(!a){
+        return APOS_ERROR;
+    }
+    return a->ben;
+}
 
 Apostador *apos_incr_din_rest(Apostador *a, double delta){
     if(!a){
@@ -70,4 +84,13 @@ Apostador *apos_incr_din_rest(Apostador *a, double delta){
     }
     a->din_rest+=delta;
     return a;
+}
+
+int apos_cmp_ben(const void *v1, const void *v2){
+    Apostador *a1 = (Apostador *) v1;
+    Apostador *a2 = (Apostador *) v2;
+    if(!a1 || !a2){
+        return 0;
+    }
+    return -1*(a1->ben - a2->ben);
 }

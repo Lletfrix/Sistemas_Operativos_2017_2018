@@ -59,6 +59,14 @@ Caballo *cab_incr_apostado(Caballo *c, double delta){
     return c;
 }
 
+Caballo *cab_set_last_tir(Caballo *c, unsigned short tir){
+    if(!c){
+        return NULL;
+    }
+    c->last_tir = tir;
+    return c;
+}
+
 unsigned short cab_get_last_tir(Caballo *c){
     if(!c){
         return CAB_ERROR;

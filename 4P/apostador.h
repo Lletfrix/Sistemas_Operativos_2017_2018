@@ -22,8 +22,12 @@ size_t apos_sizeof();
 
 char *apos_get_name(Apostador *);
 
+double apos_get_ben(Apostador *);
+
 pid_t apos_get_pid(Apostador *);
 
 double apos_get_din_rest(Apostador *);
+
+int apos_cmp_ben(const void *, const void *);
 
 #endif

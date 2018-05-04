@@ -14,7 +14,7 @@
 #include "sim_carr_lib.h"
 #include "rutina_apostador.h"
 
-volatile bool running = true;
+volatile bool running_apostador = true;
 Apostador **apostadores;
 void _apos_handler(int sig);
 
@@ -47,7 +47,7 @@ void proc_apostador(int id, double dinero, int n_cab, int n_apos){
     strcpy(mensaje.nombre, name);
     mensaje.mtype = id;
 
-    while(running){
+    while(running_apostador){
         mensaje.caballo = randNum(0, n_cab);
         apuesta = randNum(0, apos_get_din_rest(apos));
         mensaje.cantidad = apuesta;
@@ -66,7 +66,7 @@ void _apos_handler(int sig){
             exit(EXIT_SUCCESS);
         case SIGINT:
         //TODO: Revisar si tiene que hacer esto.
-            running = false;
+            running_apostador = false;
         default:
             return;
     }

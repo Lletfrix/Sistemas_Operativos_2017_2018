@@ -1,10 +1,12 @@
 #define SIGSTART SIGUSR1
 #define SIGTHROW SIGUSR2
 #define KEY_APUES_Q 1300
-#define KEY_TIR_Q 1400
-#define KEY_CAB_SHM 1500
-#define KEY_APOS_SHM 1600
-#define KEY_APUES_SHM 1700
+#define KEY_TIR_Q 1310
+#define KEY_CAB_SHM 1400
+#define KEY_APOS_SHM 1410
+#define KEY_APUES_SHM 1420
+#define KEY_SEM_MON 1500
+#define KEY_SEM_TUR 1510
 #define READ 0
 #define WRITE 1
 #define NORMAL 0

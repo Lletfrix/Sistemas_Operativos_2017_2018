@@ -7,25 +7,29 @@
 #include <sys/msg.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 #include "rutina_apostador.h"
 #include "sim_carr_lib.h"
 #include "apostador.h"
 #include "caballo.h"
 #include "apuesta.h"
+#include "semaforos.h"
+
+#define MAX_APOS_PRINT 10
 
 void _monitor_handler(int sig);
 void _monitor_pre_carrera(int , Caballo **);
-void _monitor_carrera(int , Caballo **);
-void _monitor_post_carrera();
+void _monitor_carrera(int , Caballo **, int, int);
+void _monitor_post_carrera(int , Caballo **, int , Apostador **);
 void _monitor_fin();
 
 volatile bool fin_pre_carr = false;
 volatile bool fin_carr = false;
-volatile bool fin_post_carr = false;
 
-void proc_monitor(int n_cab, int n_apos){
+void proc_monitor(int n_cab, int n_apos, int semid_mon, int semid_turno){
     Caballo **caballos;
     Apostador **apostadores;
     caballos = shmat(shmget(ftok(PATH, KEY_CAB_SHM), n_cab * cab_sizeof(), 0), NULL, 0);
@@ -34,8 +38,8 @@ void proc_monitor(int n_cab, int n_apos){
     signal(SIGINT, _monitor_handler);
     signal(SIGABRT, _monitor_handler);
     _monitor_pre_carrera(n_cab, caballos);
-    _monitor_carrera(n_cab, caballos);
-    _monitor_post_carrera();
+    _monitor_carrera(n_cab, caballos, semid_mon, semid_turno);
+    _monitor_post_carrera(n_cab, caballos, n_apos, apostadores);
     _monitor_fin();
     exit(EXIT_FAILURE);
 }
@@ -49,7 +53,8 @@ void _monitor_handler(int sig){
             fin_carr = true;
             return;
         case SIGABRT:
-            fin_post_carr = true;
+            //TODO:
+            //fin_post_carr = true;
             return;
         default:
             return;
@@ -75,16 +80,52 @@ void _monitor_pre_carrera(int n_cab, Caballo **caballos){
     }
 }
 
-void _monitor_carrera(int n_cab, Caballo **caballos){
+void _monitor_carrera(int n_cab, Caballo **caballos, int semid_mon, int semid_turno){
     int i;
     while(1){
-        //TODO: Baja el monitor
+        down_semaforo(semid_mon, 0 , 0);
             for (i = 0; i < n_cab; ++i) {
                 printf("\tCaballo: %u - Posicion %u - Ultima tirada %d\n", cab_get_id(caballos[i])+1, cab_get_pos(caballos[i]), cab_get_last_tir(caballos[i]));
             }
-        //TODO: Sube el principal
+        up_semaforo(semid_mon, 0, 0);
         if(fin_carr){
             return;
         }
     }
+}
+
+void _monitor_post_carrera(int n_cab, Caballo **caballos, int n_apos, Apostador **apostadores){
+    int i, max_pos = 0, aux_pos, lim_aux = MAX_APOS_PRINT;
+
+    for (i = 0; i < n_cab; ++i) {
+        if(max_pos < (aux_pos=cab_get_pos(caballos[i]))){
+            max_pos = aux_pos;
+        }
+    }
+
+    for (i = 0; i < n_cab; ++i) {
+        if(max_pos == cab_get_pos(caballos[i])){
+            printf("El caballo %u es ganador.\n", cab_get_pos(caballos[i]));
+        }
+    }
+
+    qsort(apostadores, n_apos, apos_sizeof(), &apos_cmp_ben);
+    if(n_apos < lim_aux){
+        lim_aux = n_apos;
+    }
+    for(i = 0; i < lim_aux; ++i){
+        printf("%d) %s: %f\n", i+1, apos_get_name(apostadores[i]), apos_get_ben(apostadores[i]));
+    }
+
+    return;
+}
+
+void _monitor_fin(){
+    int fd;
+    char c;
+    fd = open(RUTA_FICHERO_APUESTAS,O_RDONLY);
+    while(read(fd, &c, sizeof(char))){
+        write(STDOUT_FILENO, &c, sizeof(char));
+    }
+    return;
 }
