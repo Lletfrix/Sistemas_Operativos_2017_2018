@@ -16,8 +16,6 @@
 #include "caballo.h"
 #include "apuesta.h"
 
-#define RUTA_FICHERO_APUESTAS "txt/apuestas.txt"
-
 struct _ventanilla{
     Caballo **caballos;
     Apostador **apostadores;

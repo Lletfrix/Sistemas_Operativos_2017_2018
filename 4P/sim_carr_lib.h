@@ -11,8 +11,8 @@
 #define GANADORA 1
 #define REMONTAR 2
 #define PATH "/bin/bash"
-#define MAX_NAME 10
-
+#define MAX_NAME 20
+#define RUTA_FICHERO_APUESTAS "txt/apuestas.txt"
 
 struct msgtir{
     long mtype; /*!< Tipo del mensaje */
