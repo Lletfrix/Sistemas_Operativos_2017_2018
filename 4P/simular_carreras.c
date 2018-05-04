@@ -166,9 +166,11 @@ int main(int argc, char* argv[]) {
             kill(SIGTHROW, cab_get_pid(caballos[i]));
         }
         /* Actualiza la posicion de cada caballo junto a la posicion maxima y minima */
+        //TODO: Baja el principal
         for(i = 0; i < n_cab; ++i){
             msgrcv(qid_tir, (struct msgbuf *) &mensaje_tirada, 0, 0);
             pos_aux = cab_get_pos(caballos[mensaje_tirada->mtype]) + mensaje_tirada->tirada;
+            cab_set_last_tir(caballos[mensaje_tirada->mtype], mensaje_tirada->tirada);
             cab_set_pos(caballos[mensaje_tirada->mtype], pos_aux);
             if(pos_aux > max_pos){
                 max_pos = pos_aux;
@@ -177,7 +179,7 @@ int main(int argc, char* argv[]) {
                 min_pos = pos_aux;
             }
         }
-
+        //TODO: Levanta el monitor
         for (i = 0;  i < n_cab; ++i){
             if(cab_get_pos(caballos[i]) == min_pos){
                 tirada_type = REMONTAR;

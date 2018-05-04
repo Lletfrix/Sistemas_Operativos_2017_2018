@@ -38,14 +38,16 @@ Apuesta *apuesta_init(Apuesta *a, Apostador *apos, Caballo *c, unsigned short ve
 }
 
 void apuesta_execute(Apuesta *a, char *path){
-    //TODO: Synchronise, error handling
+    //TODO: Control de errores, Proteger la memoria del caballo (y del apostador?)
     FILE *fp;
     double old_cot;
     fp = fopen(path, "a");
     apos_set_ben(a->apos, cab_get_cot(a->c)*a->cantidad);
     apuesta_total += a->cantidad;
+    //TODO: DOWN MUTEX CABALLO
     cab_incr_apostado(a->c, a->cantidad);
     cab_set_cot(a->c, apuesta_total/cab_get_apostado(a->c));
+    //TODO: UP MUTEX CABALLO
     _apuesta_print(fp, a, old_cot);
     fclose(fp);
 }

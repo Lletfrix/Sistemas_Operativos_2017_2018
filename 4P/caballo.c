@@ -5,6 +5,7 @@
 struct _Caballo{
     pid_t pid;
     unsigned short id;
+    unsigned short last_tir;
     double cotizacion;
     unsigned int posicion;
     double dinero_apostado;
@@ -56,6 +57,13 @@ Caballo *cab_incr_apostado(Caballo *c, double delta){
     }
     c->dinero_apostado += delta;
     return c;
+}
+
+unsigned short cab_get_last_tir(Caballo *c){
+    if(!c){
+        return CAB_ERROR;
+    }
+    return c->last_tir;
 }
 
 size_t cab_sizeof(){

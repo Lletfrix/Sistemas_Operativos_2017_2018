@@ -49,7 +49,7 @@ void proc_tirada(int id, int **pipe){
                 perror("Switch default case in file rutina_tirada.c");
         }
         msgqid = msgget(ftok(PATH, KEY_CAB_SHM), 0);
-        mensaje.mtype = id+1;
+        mensaje.mtype = id;
         mensaje.tirada = tirada;
         msgsnd(msgqid, &mensaje, sizeof(unsigned short), 0);
     }

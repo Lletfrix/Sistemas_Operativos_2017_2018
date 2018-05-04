@@ -23,6 +23,8 @@ size_t cab_sizeof();
 
 unsigned short cab_get_id(Caballo *);
 
+unsigned short cab_get_last_tir(Caballo *);
+
 unsigned int cab_get_pos(Caballo *);
 
 pid_t cab_get_pid(Caballo *);
