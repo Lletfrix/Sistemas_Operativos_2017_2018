@@ -1,13 +1,10 @@
 #ifndef APOSTADOR
 #define APOSTADOR
 
-typedef struct _apostador{
-    pid_t pid;
-    char nombre[MAX_NAME];
-    double cant_apos;
-    double ben;
-    double din_rest;
-} Apostador;
+#define MAX_APOS_NAME 20
+#define APOS_ERROR -1
+
+typedef struct _Apostador Apostador;
 
 Apostador *apos_new();
 
@@ -19,8 +16,14 @@ Apostador *apos_set_ben(Apostador *, double);
 
 Apostador *apos_set_pid(Apostador *, pid_t);
 
+Apostador *apos_incr_din_rest(Apostador *, double);
+
+size_t apos_sizeof();
+
 char *apos_get_name(Apostador *);
 
 pid_t apos_get_pid(Apostador *);
+
+double apos_get_din_rest(Apostador *);
 
 #endif

@@ -1,9 +1,10 @@
 #ifndef APUESTA
 #define APUESTA
 
-double apuesta_total = 0;
+//TODO: Decide if this is necessary
+extern double apuesta_total;
 
-typedef struct _apuesta Apuesta;
+typedef struct _Apuesta Apuesta;
 
 Apuesta *apuesta_new();
 
@@ -11,6 +12,6 @@ void apuesta_destroy(Apuesta *);
 
 Apuesta *apuesta_init(Apuesta *a, Apostador *apos, Caballo *c, unsigned short ventanilla, double cantidad);
 
-void apuesta_execute(FILE* fp, Apuesta *a);
+void apuesta_execute(Apuesta *a, char *filepath);
 
 #endif

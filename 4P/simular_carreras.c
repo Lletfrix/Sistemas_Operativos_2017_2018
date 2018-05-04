@@ -16,19 +16,11 @@
 #define NUM_ARGS 5
 #define MAX_CAB 10
 #define MAX_APOS 100
-#define MAX_APOS_NAME 20
 #define APOS_TYPE 1
 
 void usage();
 void init_log();
 void _killall(int sig, pid_t monitor, pid_t gestor, Caballo **caballos, int n_cab, Apostador **apostadores, int n_apos);
-
-struct message{
-    long mtype; /*!< Tipo de mensaje*/
-    char nombre[MAX_APOS_NAME]; /*!< Información del mensaje*/
-    int caballo;
-    double cantidad;
-};
 
 int main(int argc, char* argv[]) {
     int i, n_cab, longitud, n_apos, n_vent, din, pid_aux, qid_apues, qid_tir, shmid_cab, shmid_apos, max_pos, min_pos, pos_aux;
@@ -79,11 +71,11 @@ int main(int argc, char* argv[]) {
         perror("Error al crear la cola de mensajes CABALLO-MAIN");
         exit(EXIT_FAILURE);
     }
-    if(shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*sizeof(Caballo), SHM_W|SHM_R|IPC_CREAT) == -1){
+    if(shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*cab_sizeof(), SHM_W|SHM_R|IPC_CREAT) == -1){
         perror("Error al crear la memoria compartida de los caballos");
         exit(EXIT_FAILURE);
     }
-    if(shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*sizeof(Apostador), SHM_W|SHM_R|IPC_CREAT) == -1){
+    if(shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*apos_sizeof(), SHM_W|SHM_R|IPC_CREAT) == -1){
         perror("Error al crear la memoria compartida de los apostadores");
         exit(EXIT_FAILURE);
     }
@@ -137,10 +129,10 @@ int main(int argc, char* argv[]) {
             exit(EXIT_FAILURE);
         }
         if(!pid_aux){
-            proc_apostador(apostador[i], i+1, din);
+            proc_apostador(i, din);
             exit(EXIT_FAILURE);
         }
-        apos_set_pid(apostador[i], pid_aux);
+        apos_set_pid(apostadores[i], pid_aux);
     }
     /* Crea los procesos de tirada */
     for(i = 0; i < n_cab; ++i){

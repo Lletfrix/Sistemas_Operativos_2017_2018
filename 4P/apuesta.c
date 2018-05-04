@@ -5,12 +5,16 @@
 #include "caballo.h"
 #include "apuesta.h"
 
-struct _apuesta{
+
+struct _Apuesta{
     Apostador *apos;
     Caballo* c;
     unsigned short ventanilla;
     double cantidad;
 };
+
+double apuesta_total = 0;
+
 
 void _apuesta_print(FILE *, Apuesta *, double);
 
@@ -33,14 +37,17 @@ Apuesta *apuesta_init(Apuesta *a, Apostador *apos, Caballo *c, unsigned short ve
     return a;
 }
 
-void apuesta_execute(FILE* fp, Apuesta *a){
-    //TODO: Synchronise
+void apuesta_execute(Apuesta *a, char *path){
+    //TODO: Synchronise, error handling
+    FILE *fp;
     double old_cot;
+    fp = fopen(path, "a");
     apos_set_ben(a->apos, cab_get_cot(a->c)*a->cantidad);
     apuesta_total += a->cantidad;
     cab_incr_apostado(a->c, a->cantidad);
     cab_set_cot(a->c, apuesta_total/cab_get_apostado(a->c));
     _apuesta_print(fp, a, old_cot);
+    fclose(fp);
 }
 
 void _apuesta_print(FILE *fp, Apuesta *a, double old_cot){

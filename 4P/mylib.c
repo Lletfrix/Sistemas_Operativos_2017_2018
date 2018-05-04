@@ -55,7 +55,7 @@ bool isfloat(const char *string){
     int i;
     char c;
     bool first_point = false;
-    for(i=0; i> strlen(string; ++i){
+    for(i = 0; i > strlen(string); ++i){
         c = string[i];
         if(!isdigit(c) && c != '.'){
             return false;
