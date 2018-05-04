@@ -16,9 +16,10 @@
 #include "apuesta.h"
 
 void _monitor_handler(int sig);
-void _monitor_pre_carrera();
-void _monitor_carrera();
+void _monitor_pre_carrera(int , Caballo **);
+void _monitor_carrera(int , Caballo **);
 void _monitor_post_carrera();
+void _monitor_fin();
 
 volatile bool fin_pre_carr = false;
 volatile bool fin_carr = false;
@@ -33,7 +34,7 @@ void proc_monitor(int n_cab, int n_apos){
     signal(SIGINT, _monitor_handler);
     signal(SIGABRT, _monitor_handler);
     _monitor_pre_carrera(n_cab, caballos);
-    _monitor_carrera();
+    _monitor_carrera(n_cab, caballos);
     _monitor_post_carrera();
     _monitor_fin();
     exit(EXIT_FAILURE);
@@ -82,7 +83,6 @@ void _monitor_carrera(int n_cab, Caballo **caballos){
                 printf("\tCaballo: %u - Posicion %u - Ultima tirada %d\n", cab_get_id(caballos[i])+1, cab_get_pos(caballos[i]), cab_get_last_tir(caballos[i]));
             }
         //TODO: Sube el principal
-        }
         if(fin_carr){
             return;
         }
