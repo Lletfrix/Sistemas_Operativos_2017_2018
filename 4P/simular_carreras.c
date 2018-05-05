@@ -36,7 +36,9 @@ void _killall(int sig, pid_t monitor, pid_t gestor, Caballo **caballos, int n_ca
 
 int main(int argc, char* argv[]) {
     int i, n_cab, longitud, n_apos, n_vent, din, pid_aux, max_pos, min_pos, pos_aux;
-    int semid_mon, semid_turno, qid_apues, qid_tir, shmid_cab, shmid_apos;
+    int semid_mon, semid_turno, semid_cab;
+    int qid_apues, qid_tir;
+    int shmid_cab, shmid_apos;
     unsigned short sem_initial_val;
     int **fd;
     char tirada_type;
@@ -76,36 +78,41 @@ int main(int argc, char* argv[]) {
 
     /* Reserva de IPCS */
     //TODO: Añadir semaforos
-    sem_initial_val = 0;
-    if(crear_semaforo(ftok(PATH, KEY_SEM_MON), 1, &semid_mon) == ERROR){
+    //TODO: Añadir liberacion de recursos al control de errores
+    if(crear_semaforo(ftok(PATH, KEY_MON_SEM), 1, &semid_mon) == ERROR){
         perror("Error al crear el semaforo monitor");
         exit(EXIT_FAILURE);
     }
-    sem_initial_val = 1;
-    if(crear_semaforo(ftok(PATH, KEY_SEM_TUR), 1, &semid_turno) == ERROR){
+    if(crear_semaforo(ftok(PATH, KEY_TUR_SEM), 1, &semid_turno) == ERROR){
         perror("Error al crear el semaforo turno");
         exit(EXIT_FAILURE);
     }
+    if(crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &semid_cab) == ERROR){
+        perror("Error al crear el semaforo turno");
+        exit(EXIT_FAILURE);
+    }
+
+    sem_initial_val = 0;
     if(inicializar_semaforo(semid_mon, &sem_initial_val) == ERROR){
         perror("Error al inicializar el semaforo monitor");
     }
+    sem_initial_val = 1;
     if(inicializar_semaforo(semid_mon, &sem_initial_val) == ERROR){
         perror("Error al inicializar el semaforo turno");
     }
-    //TODO: Añadir liberacion de recursos al control de errores
     if((qid_apues = msgget(ftok(PATH, KEY_APUES_Q), IPC_CREAT|0600)) == -1){
         perror("Error al crear la cola de mensajes APOSTADOR-GESTOR");
         exit(EXIT_FAILURE);
     }
-    if(qid_tir = msgget(ftok(PATH, KEY_TIR_Q), IPC_CREAT|0600) == -1){
+    if((qid_tir = msgget(ftok(PATH, KEY_TIR_Q), IPC_CREAT|0600)) == -1){
         perror("Error al crear la cola de mensajes CABALLO-MAIN");
         exit(EXIT_FAILURE);
     }
-    if(shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*cab_sizeof(), SHM_W|SHM_R|IPC_CREAT|0600) == -1){
+    if((shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*cab_sizeof(), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
         perror("Error al crear la memoria compartida de los caballos");
         exit(EXIT_FAILURE);
     }
-    if(shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*apos_sizeof(), SHM_W|SHM_R|IPC_CREAT|0600) == -1){
+    if((shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*apos_sizeof(), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
         perror("Error al crear la memoria compartida de los apostadores");
         exit(EXIT_FAILURE);
     }
@@ -137,7 +144,7 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
     if(!monitor){
-        proc_monitor(n_cab, n_apos, semid_mon, semid_turno);
+        proc_monitor(n_cab, n_apos);
         exit(EXIT_FAILURE);
     }
     /* Crea el gestor de apuestas */

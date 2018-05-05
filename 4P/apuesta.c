@@ -1,9 +1,13 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
 
 #include "apostador.h"
 #include "caballo.h"
 #include "apuesta.h"
+#include "semaforos.h"
+#include "sim_carr_lib.h"
 
 
 struct _Apuesta{
@@ -37,17 +41,19 @@ Apuesta *apuesta_init(Apuesta *a, Apostador *apos, Caballo *c, unsigned short ve
     return a;
 }
 
-void apuesta_execute(Apuesta *a, char *path){
+void apuesta_execute(Apuesta *a, char *path, int n_cab){
+    int cab_mutex;
     //TODO: Control de errores, Proteger la memoria del caballo (y del apostador?)
     FILE *fp;
     double old_cot;
     fp = fopen(path, "a");
     apos_set_ben(a->apos, cab_get_cot(a->c)*a->cantidad);
     apuesta_total += a->cantidad;
-    //TODO: DOWN MUTEX CABALLO
+    crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &cab_mutex);
+    down_semaforo(cab_mutex, cab_get_id(a->c), 0);
     cab_incr_apostado(a->c, a->cantidad);
     cab_set_cot(a->c, apuesta_total/cab_get_apostado(a->c));
-    //TODO: UP MUTEX CABALLO
+    up_semaforo(cab_mutex, cab_get_id(a->c), 0);
     _apuesta_print(fp, a, old_cot);
     fclose(fp);
 }

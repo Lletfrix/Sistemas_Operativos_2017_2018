@@ -15,11 +15,13 @@
 #include "apostador.h"
 #include "caballo.h"
 #include "apuesta.h"
+#include "semaforos.h"
 
 struct _ventanilla{
     Caballo **caballos;
     Apostador **apostadores;
     int ventanilla;
+    int n_cab;
     int msgqid;
 };
 
@@ -32,7 +34,8 @@ void _gestor_handler(int sig);
 void proc_gestor(int n_vent, int n_cab, int n_apos){
     Caballo **caballos;
     Apostador **apostadores;
-    int cab_shmid, apos_shmid, msgqid, i;
+    int cab_shmid, apos_shmid, msgqid, i, caballo_mutex;
+    int active[] = {0,1,2,3,4,5,6,7,8,9};
     pthread_t *threads, *mockthread;
     struct _ventanilla *e_ventanilla;
     void _gestor_handler();
@@ -48,6 +51,9 @@ void proc_gestor(int n_vent, int n_cab, int n_apos){
         cab_incr_apostado(caballos[i], 1.0 - cab_get_apostado(caballos[i]));
         cab_set_cot(caballos[i], apuesta_total/cab_get_apostado(caballos[i]));
     }
+
+    crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
+    up_multiple_semaforo(caballo_mutex, n_cab, 0, active);
     /* El dinero a pagar de cada apostador ya se inicializa cuando se ejecuta la inicializacion en rutina_apostador */
     apos_shmid = shmget(ftok(PATH, KEY_APOS_SHM),n_apos * apos_sizeof(), 0);
     apostadores = shmat(apos_shmid, NULL, 0);
@@ -66,6 +72,7 @@ void proc_gestor(int n_vent, int n_cab, int n_apos){
         e_ventanilla->apostadores = apostadores;
         e_ventanilla->msgqid = msgqid;
         e_ventanilla->ventanilla = i;
+        e_ventanilla->n_cab = n_cab;
         pthread_create(mockthread, NULL, _rutina_ventanilla, e_ventanilla);
     }
     //TODO: Aplicar mascara para que solo espere por SIGSTART o SIGABRT
@@ -96,6 +103,7 @@ void *_rutina_ventanilla(void *data){
     Caballo **caballos;
     Apostador **apostadores;
     int ventanilla;
+    int n_cab;
     int msgqid;
 
     pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
@@ -106,6 +114,7 @@ void *_rutina_ventanilla(void *data){
     apostadores = datos.apostadores;
     ventanilla = datos.ventanilla;
     msgqid = datos.msgqid;
+    n_cab = datos.n_cab;
     free(data);
 
     /* Recibe un mensaje */
@@ -115,7 +124,7 @@ void *_rutina_ventanilla(void *data){
         //TODO: Mirar que no se joda esto.
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
         apuesta = apuesta_init(apuesta_new(), apostadores[mensaje.mtype], caballos[mensaje.caballo], ventanilla, mensaje.cantidad);
-        apuesta_execute(apuesta, RUTA_FICHERO_APUESTAS);
+        apuesta_execute(apuesta, RUTA_FICHERO_APUESTAS, n_cab);
         apuesta_destroy(apuesta);
     }
     return NULL;

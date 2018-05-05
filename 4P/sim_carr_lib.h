@@ -5,8 +5,11 @@
 #define KEY_CAB_SHM 1400
 #define KEY_APOS_SHM 1410
 #define KEY_APUES_SHM 1420
-#define KEY_SEM_MON 1500
-#define KEY_SEM_TUR 1510
+#define KEY_GEN_SHM 1430
+#define KEY_MON_SEM 1500
+#define KEY_TUR_SEM 1510
+#define KEY_CAB_SEM 1520
+#define SHM_ERROR (void *) -1
 #define READ 0
 #define WRITE 1
 #define NORMAL 0
