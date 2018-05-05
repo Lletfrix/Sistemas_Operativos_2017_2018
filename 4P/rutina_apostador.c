@@ -11,6 +11,7 @@
 
 #include "mylib.h"
 #include "apostador.h"
+#include "semaforos.h"
 #include "sim_carr_lib.h"
 #include "rutina_apostador.h"
 
@@ -18,15 +19,16 @@ volatile bool running_apostador = true;
 Apostador **apostadores;
 void _apos_handler(int sig);
 
-void proc_apostador(int id, double dinero, int n_cab, int n_apos){
+void proc_apostador(int id){
     char name[MAX_APOS_NAME];
     struct msgapues mensaje;
-    int shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*apos_sizeof(), SHM_W|SHM_R);
-    int msgqid;
+    int shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos* sizeof(Apostador *), SHM_W|SHM_R);
+    int msgqid, semid_gen;
     Apostador *apos;
     double apuesta;
     void _apos_handler();
 
+    down_semaforo(semid_gen, id + n_cab , 0);
     apostadores = shmat(shmid_apos, NULL, 0);
     apos = apostadores[id];
     if(!apos){
@@ -43,7 +45,7 @@ void proc_apostador(int id, double dinero, int n_cab, int n_apos){
     msgqid = msgget(ftok(PATH, KEY_APUES_Q), 0);
 
     sprintf(name, "Apostador-%d", id+1);
-    apos_init(apos, name, dinero);
+    apos_init(apos, name, din);
     strcpy(mensaje.nombre, name);
     mensaje.mtype = id;
 

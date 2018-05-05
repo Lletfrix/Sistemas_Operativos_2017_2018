@@ -1,0 +1,27 @@
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000
+Apostador: , Ventanilla: 0, Caballo: 0, Cotizacion: Apostador: , Ventanilla: 1, Caballo: 0, Cotizacion: 0.000000, Cantidad 0.000000

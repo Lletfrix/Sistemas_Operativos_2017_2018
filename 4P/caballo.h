@@ -35,4 +35,6 @@ double cab_get_cot(Caballo *);
 
 double cab_get_apostado(Caballo *);
 
+Caballo **cab_get_shm_arr(Caballo *, size_t);
+
 #endif

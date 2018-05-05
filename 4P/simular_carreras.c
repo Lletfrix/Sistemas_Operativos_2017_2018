@@ -35,12 +35,13 @@ void init_log();
 void _killall(int sig, pid_t monitor, pid_t gestor, Caballo **caballos, int n_cab, Apostador **apostadores, int n_apos);
 
 int main(int argc, char* argv[]) {
-    int i, n_cab, longitud, n_apos, n_vent, din, pid_aux, max_pos, min_pos, pos_aux;
-    int semid_mon, semid_turno, semid_cab;
+    int i, longitud, pid_aux, max_pos, min_pos, pos_aux;
+    int semid_mon, semid_turno, semid_cab, semid_gen;
     int qid_apues, qid_tir;
     int shmid_cab, shmid_apos;
     unsigned short sem_initial_val;
     int **fd;
+    int *active;
     char tirada_type;
     Caballo **caballos;
     Apostador **apostadores;
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]) {
         usage();
         exit(EXIT_FAILURE);
     }
-
+    num_proc = n_cab+n_apos+2;
     /* Reserva de IPCS */
     //TODO: Añadir semaforos
     //TODO: Añadir liberacion de recursos al control de errores
@@ -88,7 +89,11 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
     if(crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &semid_cab) == ERROR){
-        perror("Error al crear el semaforo turno");
+        perror("Error al crear el semaforo caballo");
+        exit(EXIT_FAILURE);
+    }
+    if(crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen) == ERROR){
+        perror("Error al crear el semaforo general");
         exit(EXIT_FAILURE);
     }
 
@@ -97,7 +102,7 @@ int main(int argc, char* argv[]) {
         perror("Error al inicializar el semaforo monitor");
     }
     sem_initial_val = 1;
-    if(inicializar_semaforo(semid_mon, &sem_initial_val) == ERROR){
+    if(inicializar_semaforo(semid_turno, &sem_initial_val) == ERROR){
         perror("Error al inicializar el semaforo turno");
     }
     if((qid_apues = msgget(ftok(PATH, KEY_APUES_Q), IPC_CREAT|0600)) == -1){
@@ -108,17 +113,27 @@ int main(int argc, char* argv[]) {
         perror("Error al crear la cola de mensajes CABALLO-MAIN");
         exit(EXIT_FAILURE);
     }
-    if((shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*cab_sizeof(), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
+    if((shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*sizeof(Caballo *), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
         perror("Error al crear la memoria compartida de los caballos");
         exit(EXIT_FAILURE);
     }
-    if((shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*apos_sizeof(), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
+    if((shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*sizeof(Apostador *), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
         perror("Error al crear la memoria compartida de los apostadores");
         exit(EXIT_FAILURE);
     }
 
+
+    //printf("Principal: caballos: %d - %p, apostadores: %d - %p\n", shmid_cab, caballos, shmid_apos, apostadores);
+
     caballos = shmat(shmid_cab, NULL, 0);
+    for(i = 0; i < n_cab; ++i){
+        caballos[i] = shmat(shmget(ftok(PATH, KEY_CAB_SHM+i+1), cab_sizeof(),  SHM_W|SHM_R|IPC_CREAT|0600), NULL, 0);
+    }
+    
     apostadores = shmat(shmid_apos, NULL, 0);
+    for(i = 0; i < n_apos; ++i){
+        apostadores[i] = apos_new();
+    }
 
     fd = calloc(n_cab, sizeof(int *));
     for (i = 0; i < n_cab; ++i) {
@@ -144,7 +159,7 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
     if(!monitor){
-        proc_monitor(n_cab, n_apos);
+        proc_monitor();
         exit(EXIT_FAILURE);
     }
     /* Crea el gestor de apuestas */
@@ -154,7 +169,7 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
     if(!gestor){
-        proc_gestor(n_vent, n_cab, n_apos);
+        proc_gestor();
         exit(EXIT_FAILURE);
     }
     /* Crea los procesos apostadores */
@@ -166,7 +181,7 @@ int main(int argc, char* argv[]) {
             exit(EXIT_FAILURE);
         }
         if(!pid_aux){
-            proc_apostador(i, din, n_cab, n_apos);
+            proc_apostador(i);
             exit(EXIT_FAILURE);
         }
         apos_set_pid(apostadores[i], pid_aux);
@@ -186,6 +201,13 @@ int main(int argc, char* argv[]) {
         cab_set_pid(caballos[i], pid_aux);
         cab_set_id(caballos[i], i);
     }
+
+    active = calloc(num_proc, sizeof(int));
+    for (i = 0; i < num_proc; i++) {
+        active[i] = i;
+    }
+    up_multiple_semaforo(semid_gen, num_proc, 0, active);
+    free(active);
 
     /* Espera a que empiece la carrera */
     sleep(30);

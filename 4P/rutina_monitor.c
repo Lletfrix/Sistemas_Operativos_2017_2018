@@ -29,14 +29,21 @@ void _monitor_fin();
 volatile bool fin_pre_carr = false;
 volatile bool fin_carr = false;
 
-void proc_monitor(int n_cab, int n_apos){
+void proc_monitor(){
+    int shmid_cab, shmid_apos, semid_gen;
     Caballo **caballos;
     Apostador **apostadores;
-    caballos = shmat(shmget(ftok(PATH, KEY_CAB_SHM), n_cab * cab_sizeof(), 0), NULL, 0);
-    apostadores = shmat(shmget(ftok(PATH, KEY_APOS_SHM), n_apos * apos_sizeof(), 0), NULL, 0);
+    shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab * sizeof(Caballo *), 0);
+    caballos = shmat(shmid_cab, NULL, 0);
+    shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos * sizeof(Apostador *), 0);
+    apostadores = shmat(shmid_apos, NULL, 0);
+    //printf("Monitor: caballos: %d - %p, apostadores: %d - %p\n", shmid_cab, caballos, shmid_apos, apostadores);
     signal(SIGSTART, _monitor_handler);
     signal(SIGINT, _monitor_handler);
     signal(SIGABRT, _monitor_handler);
+    crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
+    printf("esperando a que el proceso principal me levante... - soy %d\n", semid_gen);
+    down_semaforo(semid_gen, n_cab + n_apos, 0);
     _monitor_pre_carrera(n_cab, caballos);
     _monitor_carrera(n_cab, caballos);
     _monitor_post_carrera(n_cab, caballos, n_apos, apostadores);
@@ -71,7 +78,7 @@ void _monitor_pre_carrera(int n_cab, Caballo **caballos){
             //TODO: Control mutex de caballos, deberia hacer un down multilpe?
             crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
             down_multiple_semaforo(caballo_mutex, n_cab, 0, active);
-            printf("\tCaballo: %u - Cotizacion %f\n", cab_get_id(caballos[i])+1, cab_get_cot(caballos[i]));
+            printf("\tCaballo: %u - Cotizacion %f\n", cab_get_id(caballos[j])+1, cab_get_cot(caballos[j]));
             up_multiple_semaforo(caballo_mutex, n_cab, 0, active);
         }
         sleep(1);
@@ -116,7 +123,7 @@ void _monitor_post_carrera(int n_cab, Caballo **caballos, int n_apos, Apostador 
         }
     }
 
-    qsort(apostadores, n_apos, apos_sizeof(), &apos_cmp_ben);
+    qsort(apostadores, n_apos, sizeof(Apostador *), &apos_cmp_ben);
     if(n_apos < lim_aux){
         lim_aux = n_apos;
     }

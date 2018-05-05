@@ -12,6 +12,6 @@ void apuesta_destroy(Apuesta *);
 
 Apuesta *apuesta_init(Apuesta *a, Apostador *apos, Caballo *c, unsigned short ventanilla, double cantidad);
 
-void apuesta_execute(Apuesta *a, char *filepath, int n_cab);
+void apuesta_execute(Apuesta *a, char *filepath);
 
 #endif

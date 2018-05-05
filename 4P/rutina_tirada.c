@@ -9,6 +9,7 @@
 
 #include "sim_carr_lib.h"
 #include "mylib.h"
+#include "semaforos.h"
 #include "rutina_tirada.h"
 
 void _tirada_handler(int sig);
@@ -20,7 +21,10 @@ void proc_tirada(int id, int **pipe){
     char tirada_type;
     unsigned short tirada;
     struct msgtir mensaje;
-    int msgqid;
+    int msgqid, semid_gen;
+
+    crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
+    down_semaforo(semid_gen, id, 0);
 
     close(pipe[id][WRITE]);
     signal(SIGTHROW, _tirada_handler);
