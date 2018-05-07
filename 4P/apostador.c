@@ -4,14 +4,6 @@
 
 #include "apostador.h"
 
-struct _Apostador{
-    pid_t pid;
-    char nombre[MAX_APOS_NAME];
-    double cant_apos;
-    double ben;
-    double din_rest;
-};
-
 Apostador *apos_new(){
     return calloc(1, sizeof(Apostador));
 }
@@ -21,7 +13,7 @@ void apos_destroy(Apostador *a){
 }
 
 Apostador *apos_init(Apostador *a, char *name, double din_init){
-    if(!a || !name || strlen(name) >= 10){
+    if(!a || !name || strlen(name)-1  > MAX_APOS_NAME){
         return NULL;
     }
     strcpy(a->nombre, name);

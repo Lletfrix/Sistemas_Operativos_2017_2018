@@ -3,7 +3,14 @@
 
 #define CAB_ERROR -1;
 
-typedef struct _Caballo Caballo;
+typedef struct _Caballo{
+    pid_t pid;
+    unsigned short id;
+    unsigned short last_tir;
+    double cotizacion;
+    unsigned int posicion;
+    double dinero_apostado;
+} Caballo;
 
 Caballo *cab_new();
 

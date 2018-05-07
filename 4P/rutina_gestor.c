@@ -18,8 +18,8 @@
 #include "semaforos.h"
 
 struct _ventanilla{
-    Caballo **caballos;
-    Apostador **apostadores;
+    Caballo *caballos;
+    Apostador *apostadores;
     int ventanilla;
     int msgqid;
 };
@@ -31,8 +31,8 @@ volatile bool end = false;;
 void _gestor_handler(int sig);
 
 void proc_gestor(){
-    Caballo **caballos;
-    Apostador **apostadores;
+    Caballo *caballos;
+    Apostador *apostadores;
     int cab_shmid, apos_shmid, msgqid, i, caballo_mutex, semid_gen;
     int active[] = {0,1,2,3,4,5,6,7,8,9};
     pthread_t *threads, *mockthread;
@@ -45,18 +45,18 @@ void proc_gestor(){
 
     down_semaforo(semid_gen, n_apos+n_cab+1, 0);
     /* Inicia el valor de apuesta de cada caballo */
-    cab_shmid = shmget(ftok(PATH, KEY_CAB_SHM), n_cab * sizeof(Caballo *), 0);
+    cab_shmid = shmget(ftok(PATH, KEY_CAB_SHM), n_cab * sizeof(Caballo), 0);
     caballos = shmat(cab_shmid, NULL, 0);
     for (i = 0; i < n_cab; ++i){
-        cab_incr_apostado(caballos[i], 1.0 - cab_get_apostado(caballos[i]));
-        cab_set_cot(caballos[i], apuesta_total/cab_get_apostado(caballos[i]));
-        //printf("RUTINA_GESTOR: Caballo-%d - Dinero apostado: %lf - Cotizacion: %lf\n",i, cab_get_apostado(caballos[i]), cab_get_cot(caballos[i]));
+        cab_incr_apostado(&caballos[i], 1.0 - cab_get_apostado(&caballos[i]));
+        cab_set_cot(&caballos[i], apuesta_total/cab_get_apostado(&caballos[i]));
+        printf("RUTINA_GESTOR: Caballo-%d - Dinero apostado: %lf - Cotizacion: %lf\n",i, cab_get_apostado(&caballos[i]), cab_get_cot(&caballos[i]));
     }
 
     crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
     up_multiple_semaforo(caballo_mutex, n_cab, 0, active);
     /* El dinero a pagar de cada apostador ya se inicializa cuando se ejecuta la inicializacion en rutina_apostador */
-    apos_shmid = shmget(ftok(PATH, KEY_APOS_SHM),n_apos * sizeof(Apostador *), 0);
+    apos_shmid = shmget(ftok(PATH, KEY_APOS_SHM),n_apos * sizeof(Apostador), 0);
     apostadores = shmat(apos_shmid, NULL, 0);
 
     /* Obtiene la cola de mensajes */
@@ -75,8 +75,8 @@ void proc_gestor(){
         e_ventanilla->ventanilla = i;
         pthread_create(mockthread, NULL, _rutina_ventanilla, e_ventanilla);
     }
-    //TODO: Aplicar mascara para que solo espere por SIGSTART o SIGABRT
-    //sigsuspend();
+    //TODO: Aplicar mascara para que solo espere por SIGSTART o SIGABRT. Cambiar el pause.
+    pause();
     for(i = 0, mockthread = threads; i < n_vent; ++i, ++mockthread){
         //TODO: Ver si es mejor hacerlo con un while
         pthread_cancel(*mockthread);
@@ -100,8 +100,8 @@ void *_rutina_ventanilla(void *data){
     struct msgapues mensaje;
     struct _ventanilla datos = * (struct _ventanilla *) data;
     Apuesta *apuesta;
-    Caballo **caballos;
-    Apostador **apostadores;
+    Caballo *caballos;
+    Apostador *apostadores;
     int ventanilla;
     int msgqid;
 
@@ -118,10 +118,13 @@ void *_rutina_ventanilla(void *data){
     /* Recibe un mensaje */
     while(1){
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-        msgrcv(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0, 0);
+        if(-1 == msgrcv(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0, 0)){
+            perror("Couldn't recieve menssage");
+        };
+        printf("Acabo de recibir un mensaje, soy %d\n", ventanilla);
         //TODO: Mirar que no se joda esto.
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-        apuesta = apuesta_init(apuesta_new(), apostadores[mensaje.mtype], caballos[mensaje.caballo], ventanilla, mensaje.cantidad);
+        apuesta = apuesta_init(apuesta_new(), &apostadores[mensaje.mtype-1], &caballos[mensaje.caballo], ventanilla, mensaje.cantidad);
         apuesta_execute(apuesta, RUTA_FICHERO_APUESTAS);
         apuesta_destroy(apuesta);
     }

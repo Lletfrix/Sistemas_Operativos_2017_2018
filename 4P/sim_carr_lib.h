@@ -17,7 +17,7 @@
 #define GANADORA 1
 #define REMONTAR 2
 #define PATH "/bin/bash"
-#define MAX_NAME 20
+#define MAX_NAME 10
 #define RUTA_FICHERO_APUESTAS "txt/apuestas.txt"
 
 extern int num_proc, n_cab, n_apos, n_vent;

@@ -16,24 +16,18 @@
 #include "rutina_apostador.h"
 
 volatile bool running_apostador = true;
-Apostador **apostadores;
+Apostador *apostadores;
 void _apos_handler(int sig);
 
 void proc_apostador(int id){
     char name[MAX_APOS_NAME];
     struct msgapues mensaje;
-    int shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos* sizeof(Apostador *), SHM_W|SHM_R);
+    int shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos* sizeof(Apostador), SHM_W|SHM_R);
     int msgqid, semid_gen;
-    Apostador *apos;
     double apuesta;
     void _apos_handler();
 
-    down_semaforo(semid_gen, id + n_cab , 0);
     apostadores = shmat(shmid_apos, NULL, 0);
-    apos = apostadores[id];
-    if(!apos){
-        exit(EXIT_FAILURE);
-    }
 
     signal(SIGSTART, _apos_handler);
     signal(SIGINT, _apos_handler);
@@ -45,16 +39,20 @@ void proc_apostador(int id){
     msgqid = msgget(ftok(PATH, KEY_APUES_Q), 0);
 
     sprintf(name, "Apostador-%d", id+1);
-    apos_init(apos, name, din);
+    apos_init(&apostadores[id], name, din);
     strcpy(mensaje.nombre, name);
-    mensaje.mtype = id;
-
+    mensaje.mtype = id+1;
+    printf("Soy %s y voy a dormir. Deberia tener %lf y tengo %lf\n", apos_get_name(&apostadores[id]), din, apos_get_din_rest(&apostadores[id]));
+    down_semaforo(semid_gen, id + n_cab , 0);
     while(running_apostador){
         mensaje.caballo = randNum(0, n_cab);
-        apuesta = randNum(0, apos_get_din_rest(apos));
+        apuesta = randNum(0, apos_get_din_rest(&apostadores[id]));
         mensaje.cantidad = apuesta;
-        msgsnd(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0);
-        apos_incr_din_rest(apos, -1*apuesta);
+        if(-1 == msgsnd(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0)){
+            perror("Couldn't send message");
+        }
+        printf("Acabo de enviar un mensaje %d:%d:%lf\n",id+1, mensaje.caballo, apuesta );
+        apos_incr_din_rest(&apostadores[id], -1*apuesta);
         sleep(1);
     }
 }

@@ -2,15 +2,6 @@
 
 #include "caballo.h"
 
-struct _Caballo{
-    pid_t pid;
-    unsigned short id;
-    unsigned short last_tir;
-    double cotizacion;
-    unsigned int posicion;
-    double dinero_apostado;
-};
-
 Caballo *cab_new(){
     return calloc(1, sizeof(Caballo));
 }

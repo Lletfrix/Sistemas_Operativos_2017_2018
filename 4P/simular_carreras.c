@@ -32,19 +32,19 @@
 
 void usage();
 void init_log();
-void _killall(int sig, pid_t monitor, pid_t gestor, Caballo **caballos, int n_cab, Apostador **apostadores, int n_apos);
+void _killall(int sig, pid_t monitor, pid_t gestor, Caballo *caballos, int n_cab, Apostador *apostadores, int n_apos);
 
 int main(int argc, char* argv[]) {
     int i, longitud, pid_aux, max_pos, min_pos, pos_aux;
     int semid_mon, semid_turno, semid_cab, semid_gen;
     int qid_apues, qid_tir;
     int shmid_cab, shmid_apos;
-    unsigned short sem_initial_val;
+    unsigned short sem_initial_val, *sem_cab_init;
     int **fd;
     int *active;
     char tirada_type;
-    Caballo **caballos;
-    Apostador **apostadores;
+    Caballo *caballos;
+    Apostador *apostadores;
     pid_t gestor, monitor;
     struct msgtir mensaje_tirada;
 
@@ -105,6 +105,14 @@ int main(int argc, char* argv[]) {
     if(inicializar_semaforo(semid_turno, &sem_initial_val) == ERROR){
         perror("Error al inicializar el semaforo turno");
     }
+    sem_cab_init = calloc(n_cab, sizeof(unsigned short));
+    for (i = 0; i < n_cab; ++i) {
+        sem_cab_init[i] = 1;
+    }
+    if(inicializar_semaforo(semid_cab, sem_cab_init) == ERROR){
+        perror("Error al inicializar el semaforo caballo mutex");
+    }
+
     if((qid_apues = msgget(ftok(PATH, KEY_APUES_Q), IPC_CREAT|0600)) == -1){
         perror("Error al crear la cola de mensajes APOSTADOR-GESTOR");
         exit(EXIT_FAILURE);
@@ -113,27 +121,17 @@ int main(int argc, char* argv[]) {
         perror("Error al crear la cola de mensajes CABALLO-MAIN");
         exit(EXIT_FAILURE);
     }
-    if((shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*sizeof(Caballo *), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
+    if((shmid_cab = shmget(ftok(PATH, KEY_CAB_SHM), n_cab*sizeof(Caballo), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
         perror("Error al crear la memoria compartida de los caballos");
         exit(EXIT_FAILURE);
     }
-    if((shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*sizeof(Apostador *), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
+    if((shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos*sizeof(Apostador), SHM_W|SHM_R|IPC_CREAT|0600)) == -1){
         perror("Error al crear la memoria compartida de los apostadores");
         exit(EXIT_FAILURE);
     }
 
-
-    //printf("Principal: caballos: %d - %p, apostadores: %d - %p\n", shmid_cab, caballos, shmid_apos, apostadores);
-
     caballos = shmat(shmid_cab, NULL, 0);
-    for(i = 0; i < n_cab; ++i){
-        caballos[i] = shmat(shmget(ftok(PATH, KEY_CAB_SHM+i+1), cab_sizeof(),  SHM_W|SHM_R|IPC_CREAT|0600), NULL, 0);
-    }
-    
     apostadores = shmat(shmid_apos, NULL, 0);
-    for(i = 0; i < n_apos; ++i){
-        apostadores[i] = apos_new();
-    }
 
     fd = calloc(n_cab, sizeof(int *));
     for (i = 0; i < n_cab; ++i) {
@@ -184,7 +182,7 @@ int main(int argc, char* argv[]) {
             proc_apostador(i);
             exit(EXIT_FAILURE);
         }
-        apos_set_pid(apostadores[i], pid_aux);
+        apos_set_pid(&apostadores[i], pid_aux);
     }
     /* Crea los procesos de tirada */
     for(i = 0; i < n_cab; ++i){
@@ -198,14 +196,15 @@ int main(int argc, char* argv[]) {
             proc_tirada(i, fd);
             exit(EXIT_FAILURE);
         }
-        cab_set_pid(caballos[i], pid_aux);
-        cab_set_id(caballos[i], i);
+        cab_set_pid(&caballos[i], pid_aux);
+        cab_set_id(&caballos[i], i);
     }
 
     active = calloc(num_proc, sizeof(int));
     for (i = 0; i < num_proc; i++) {
         active[i] = i;
     }
+    printf("Voy a levantar a todos mis hijos\n");
     up_multiple_semaforo(semid_gen, num_proc, 0, active);
     free(active);
 
@@ -219,15 +218,15 @@ int main(int argc, char* argv[]) {
     while(max_pos < longitud){
         min_pos = longitud;
         for(i = 0; i < n_cab; ++i){
-            kill(SIGTHROW, cab_get_pid(caballos[i]));
+            kill(SIGTHROW, cab_get_pid(&caballos[i]));
         }
         /* Actualiza la posicion de cada caballo junto a la posicion maxima y minima */
         down_semaforo(semid_turno, 0, 0);
         for(i = 0; i < n_cab; ++i){
             msgrcv(qid_tir, (struct msgbuf *) &mensaje_tirada, sizeof(struct msgtir) - sizeof(long),0, 0);
-            pos_aux = cab_get_pos(caballos[mensaje_tirada.mtype]) + mensaje_tirada.tirada;
-            cab_set_last_tir(caballos[mensaje_tirada.mtype], mensaje_tirada.tirada);
-            cab_set_pos(caballos[mensaje_tirada.mtype], pos_aux);
+            pos_aux = cab_get_pos(&caballos[mensaje_tirada.mtype]) + mensaje_tirada.tirada;
+            cab_set_last_tir(&caballos[mensaje_tirada.mtype], mensaje_tirada.tirada);
+            cab_set_pos(&caballos[mensaje_tirada.mtype], pos_aux);
             if(pos_aux > max_pos){
                 max_pos = pos_aux;
             }
@@ -237,9 +236,9 @@ int main(int argc, char* argv[]) {
         }
         up_semaforo(semid_mon, 0, 0);
         for (i = 0;  i < n_cab; ++i){
-            if(cab_get_pos(caballos[i]) == min_pos){
+            if(cab_get_pos(&caballos[i]) == min_pos){
                 tirada_type = REMONTAR;
-            }else if(cab_get_pos(caballos[i]) == max_pos){
+            }else if(cab_get_pos(&caballos[i]) == max_pos){
                 tirada_type = GANADORA;
             }else{
                 tirada_type = NORMAL;
@@ -267,14 +266,14 @@ void init_log(){
     openlog("proyect_logger",LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 }
 
-void _killall(int sig, pid_t monitor, pid_t gestor, Caballo **caballos, int n_cab, Apostador **apostadores, int n_apos){
+void _killall(int sig, pid_t monitor, pid_t gestor, Caballo *caballos, int n_cab, Apostador *apostadores, int n_apos){
     int i;
     kill(sig, monitor);
     kill(sig, gestor);
     for(i = 0; i < n_cab; ++i){
-        kill(sig, cab_get_pid(caballos[i]));
+        kill(sig, cab_get_pid(&caballos[i]));
     }
     for(i = 0; i < n_apos; ++i){
-        kill(sig, apos_get_pid(apostadores[i]));
+        kill(sig, apos_get_pid(&apostadores[i]));
     }
 }

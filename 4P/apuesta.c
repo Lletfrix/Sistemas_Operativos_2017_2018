@@ -50,11 +50,12 @@ void apuesta_execute(Apuesta *a, char *path){
     apos_set_ben(a->apos, cab_get_cot(a->c)*a->cantidad);
     apuesta_total += a->cantidad;
     crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &cab_mutex);
-    //down_semaforo(cab_mutex, cab_get_id(a->c), 0);
+    down_semaforo(cab_mutex, cab_get_id(a->c), 0);
     cab_incr_apostado(a->c, a->cantidad);
     cab_set_cot(a->c, apuesta_total/cab_get_apostado(a->c));
-    //up_semaforo(cab_mutex, cab_get_id(a->c), 0);
+    up_semaforo(cab_mutex, cab_get_id(a->c), 0);
     _apuesta_print(fp, a, old_cot);
+    _apuesta_print(stdout, a, old_cot);
     fclose(fp);
 }
 
