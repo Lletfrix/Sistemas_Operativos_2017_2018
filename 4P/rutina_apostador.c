@@ -14,6 +14,7 @@
 #include "semaforos.h"
 #include "sim_carr_lib.h"
 #include "rutina_apostador.h"
+#include "time.h"
 
 volatile bool running_apostador = true;
 Apostador *apostadores;
@@ -42,16 +43,16 @@ void proc_apostador(int id){
     apos_init(&apostadores[id], name, din);
     strcpy(mensaje.nombre, name);
     mensaje.mtype = id+1;
-    printf("Soy %s y voy a dormir. Deberia tener %lf y tengo %lf\n", apos_get_name(&apostadores[id]), din, apos_get_din_rest(&apostadores[id]));
+    srand(time(NULL));
+    crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
     down_semaforo(semid_gen, id + n_cab , 0);
     while(running_apostador){
         mensaje.caballo = randNum(0, n_cab);
-        apuesta = randNum(0, apos_get_din_rest(&apostadores[id]));
+        apuesta = randNum(0, apos_get_din_rest(&apostadores[id])/30);
         mensaje.cantidad = apuesta;
         if(-1 == msgsnd(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0)){
             perror("Couldn't send message");
         }
-        printf("Acabo de enviar un mensaje %d:%d:%lf\n",id+1, mensaje.caballo, apuesta );
         apos_incr_din_rest(&apostadores[id], -1*apuesta);
         sleep(1);
     }

@@ -23,22 +23,30 @@ void proc_tirada(int id, int **pipe){
     struct msgtir mensaje;
     int msgqid, semid_gen;
 
-    crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
-    down_semaforo(semid_gen, id, 0);
-
     close(pipe[id][WRITE]);
+
     signal(SIGTHROW, _tirada_handler);
     signal(SIGINT, _tirada_handler);
     signal(SIGABRT, _tirada_handler);
     signal(SIGSTART, _tirada_handler);
+
     sigemptyset(&set);
     sigaddset_var(&set, SIGTHROW, SIGINT, SIGABRT, SIGSTART,-1);
     sigprocmask(SIG_BLOCK, &set, &oldset);
+
+    crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
+    down_semaforo(semid_gen, id, 0);
+
+    printf("Voy a esperar por la señal SIGSTART\n");
     sigsuspend(&oldset);
+    printf("Deje de esperar por SIGSTART\n");
     while(running_tirada){
         tirada = 0;
+        printf("Voy a esperar por SIGTHROW\n");
         sigsuspend(&oldset);
+        printf("Deje de esperar por SIGTHROW\n");
         read(pipe[id][READ], &tirada_type, sizeof(char));
+        printf("Lei la pipe\n");
         switch (tirada_type) {
             case REMONTAR:
                 tirada += (unsigned short) randNum(1, 7);
@@ -53,10 +61,14 @@ void proc_tirada(int id, int **pipe){
             default:
                 perror("Switch default case in file rutina_tirada.c");
         }
-        msgqid = msgget(ftok(PATH, KEY_CAB_SHM), 0);
-        mensaje.mtype = id;
+        printf("Tirada:%d\n", tirada);
+        msgqid = msgget(ftok(PATH, KEY_TIR_Q), 0);
+        mensaje.mtype = id+1;
         mensaje.tirada = tirada;
-        msgsnd(msgqid, &mensaje, sizeof(unsigned short), 0);
+        printf("msgqid: %d, mensaj.mtype: %ld, tirada: %d\n",msgqid,mensaje.mtype, mensaje.tirada );
+        if(msgsnd(msgqid, &mensaje, sizeof(struct msgtir) - sizeof(long), 0) == -1){
+            perror("Couldn't send");
+        }
     }
     exit(EXIT_SUCCESS);
 }

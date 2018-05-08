@@ -183,6 +183,7 @@ int main(int argc, char* argv[]) {
             exit(EXIT_FAILURE);
         }
         apos_set_pid(&apostadores[i], pid_aux);
+        sleep(1);
     }
     /* Crea los procesos de tirada */
     for(i = 0; i < n_cab; ++i){
@@ -204,29 +205,38 @@ int main(int argc, char* argv[]) {
     for (i = 0; i < num_proc; i++) {
         active[i] = i;
     }
-    printf("Voy a levantar a todos mis hijos\n");
+
     up_multiple_semaforo(semid_gen, num_proc, 0, active);
     free(active);
 
     /* Espera a que empiece la carrera */
-    sleep(30);
+    sleep(TIEMPO_PRE_CARR);
 
+    printf("Voy a comenzar la carrera\n");
     _killall(SIGSTART, monitor, gestor, caballos, n_cab, apostadores, n_apos);
-
+    printf("Mande señal SIGSTART\n");
+    for (i = 0;  i < n_cab; ++i){
+        tirada_type = NORMAL;
+        write(fd[i][WRITE], &tirada_type, sizeof(char));
+    }
+    sleep(5);
     max_pos = 0;
     //TODO: Open pipe
     while(max_pos < longitud){
         min_pos = longitud;
+        printf("Mando señal a los caballos\n");
         for(i = 0; i < n_cab; ++i){
-            kill(SIGTHROW, cab_get_pid(&caballos[i]));
+            kill(cab_get_pid(&caballos[i]), SIGTHROW);
         }
         /* Actualiza la posicion de cada caballo junto a la posicion maxima y minima */
+        printf("Voy hacer down del turno\n");
         down_semaforo(semid_turno, 0, 0);
+        printf("Hice down del turno\n");
         for(i = 0; i < n_cab; ++i){
             msgrcv(qid_tir, (struct msgbuf *) &mensaje_tirada, sizeof(struct msgtir) - sizeof(long),0, 0);
-            pos_aux = cab_get_pos(&caballos[mensaje_tirada.mtype]) + mensaje_tirada.tirada;
-            cab_set_last_tir(&caballos[mensaje_tirada.mtype], mensaje_tirada.tirada);
-            cab_set_pos(&caballos[mensaje_tirada.mtype], pos_aux);
+            pos_aux = cab_get_pos(&caballos[mensaje_tirada.mtype-1]) + mensaje_tirada.tirada;
+            cab_set_last_tir(&caballos[mensaje_tirada.mtype-1], mensaje_tirada.tirada);
+            cab_set_pos(&caballos[mensaje_tirada.mtype-1], pos_aux);
             if(pos_aux > max_pos){
                 max_pos = pos_aux;
             }
@@ -268,12 +278,13 @@ void init_log(){
 
 void _killall(int sig, pid_t monitor, pid_t gestor, Caballo *caballos, int n_cab, Apostador *apostadores, int n_apos){
     int i;
-    kill(sig, monitor);
-    kill(sig, gestor);
-    for(i = 0; i < n_cab; ++i){
-        kill(sig, cab_get_pid(&caballos[i]));
-    }
+    kill(gestor, sig);
     for(i = 0; i < n_apos; ++i){
-        kill(sig, apos_get_pid(&apostadores[i]));
+        kill(apos_get_pid(&apostadores[i]), sig);
+    }
+    if(-1 == kill(monitor, sig)){
+    }
+    for(i = 0; i < n_cab; ++i){
+        kill(cab_get_pid(&caballos[i]), sig);
     }
 }

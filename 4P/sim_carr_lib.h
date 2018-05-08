@@ -18,7 +18,8 @@
 #define REMONTAR 2
 #define PATH "/bin/bash"
 #define MAX_NAME 10
-#define RUTA_FICHERO_APUESTAS "txt/apuestas.txt"
+#define RUTA_FICHERO_APUESTAS "text/apuestas.txt"
+#define TIEMPO_PRE_CARR 10
 
 extern int num_proc, n_cab, n_apos, n_vent;
 extern double din;

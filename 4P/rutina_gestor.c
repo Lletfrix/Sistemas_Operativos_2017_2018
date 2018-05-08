@@ -43,18 +43,18 @@ void proc_gestor(){
     signal(SIGINT, _gestor_handler);
     signal(SIGSTART, _gestor_handler);
 
-    down_semaforo(semid_gen, n_apos+n_cab+1, 0);
+
     /* Inicia el valor de apuesta de cada caballo */
     cab_shmid = shmget(ftok(PATH, KEY_CAB_SHM), n_cab * sizeof(Caballo), 0);
     caballos = shmat(cab_shmid, NULL, 0);
     for (i = 0; i < n_cab; ++i){
         cab_incr_apostado(&caballos[i], 1.0 - cab_get_apostado(&caballos[i]));
         cab_set_cot(&caballos[i], apuesta_total/cab_get_apostado(&caballos[i]));
-        printf("RUTINA_GESTOR: Caballo-%d - Dinero apostado: %lf - Cotizacion: %lf\n",i, cab_get_apostado(&caballos[i]), cab_get_cot(&caballos[i]));
     }
 
-    crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
-    up_multiple_semaforo(caballo_mutex, n_cab, 0, active);
+    //crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
+    crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
+    down_semaforo(semid_gen, n_apos+n_cab+1, 0);
     /* El dinero a pagar de cada apostador ya se inicializa cuando se ejecuta la inicializacion en rutina_apostador */
     apos_shmid = shmget(ftok(PATH, KEY_APOS_SHM),n_apos * sizeof(Apostador), 0);
     apostadores = shmat(apos_shmid, NULL, 0);
@@ -121,10 +121,8 @@ void *_rutina_ventanilla(void *data){
         if(-1 == msgrcv(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0, 0)){
             perror("Couldn't recieve menssage");
         };
-        printf("Acabo de recibir un mensaje, soy %d\n", ventanilla);
-        //TODO: Mirar que no se joda esto.
         pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-        apuesta = apuesta_init(apuesta_new(), &apostadores[mensaje.mtype-1], &caballos[mensaje.caballo], ventanilla, mensaje.cantidad);
+        apuesta = apuesta_init(apuesta_new(), &apostadores[mensaje.mtype-1], caballos, mensaje.caballo, ventanilla, mensaje.cantidad);
         apuesta_execute(apuesta, RUTA_FICHERO_APUESTAS);
         apuesta_destroy(apuesta);
     }

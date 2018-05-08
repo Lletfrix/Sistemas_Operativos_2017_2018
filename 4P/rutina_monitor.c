@@ -42,8 +42,8 @@ void proc_monitor(){
     signal(SIGINT, _monitor_handler);
     signal(SIGABRT, _monitor_handler);
     crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
-    printf("esperando a que el proceso principal me levante... - soy %d\n", semid_gen);
     down_semaforo(semid_gen, n_cab + n_apos, 0);
+    usleep(500);
     _monitor_pre_carrera(n_cab, caballos);
     _monitor_carrera(n_cab, caballos);
     _monitor_post_carrera(n_cab, caballos, n_apos, apostadores);
@@ -69,21 +69,21 @@ void _monitor_handler(int sig){
 }
 
 void _monitor_pre_carrera(int n_cab, Caballo *caballos){
-    int i = 30, j, caballo_mutex;
+    int i = TIEMPO_PRE_CARR, j, caballo_mutex;
     int active[] = {0,1,2,3,4,5,6,7,8,9};
+    crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
     while(1){
         printf("Quedan: %d s.\n", i);
         printf("La cotizacion de cada caballo actualmente es:\n");
+        down_multiple_semaforo(caballo_mutex, n_cab, 0, active);
         for (j = 0; j < n_cab; ++j) {
             //TODO: Control mutex de caballos, deberia hacer un down multilpe?
-            crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
-            down_multiple_semaforo(caballo_mutex, n_cab, 0, active);
             printf("\tCaballo: %u - Cotizacion %f\n", cab_get_id(&caballos[j])+1, cab_get_cot(&caballos[j]));
-            up_multiple_semaforo(caballo_mutex, n_cab, 0, active);
         }
+        up_multiple_semaforo(caballo_mutex, n_cab, 0, active);
         sleep(1);
         if(i){
-            i--;
+            --i;
         }
         if(fin_pre_carr){
             return;

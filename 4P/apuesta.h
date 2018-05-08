@@ -10,7 +10,7 @@ Apuesta *apuesta_new();
 
 void apuesta_destroy(Apuesta *);
 
-Apuesta *apuesta_init(Apuesta *a, Apostador *apos, Caballo *c, unsigned short ventanilla, double cantidad);
+Apuesta *apuesta_init(Apuesta *a, Apostador *apos, Caballo *c, int cab_id, unsigned short ventanilla, double cantidad);
 
 void apuesta_execute(Apuesta *a, char *filepath);
 
