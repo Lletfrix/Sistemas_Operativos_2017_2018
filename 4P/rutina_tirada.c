@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "sim_carr_lib.h"
 #include "mylib.h"
@@ -23,6 +24,8 @@ void proc_tirada(int id, int **pipe){
     struct msgtir mensaje;
     int msgqid, semid_gen;
 
+    srand(time(NULL));
+
     close(pipe[id][WRITE]);
 
     signal(SIGTHROW, _tirada_handler);
@@ -37,16 +40,11 @@ void proc_tirada(int id, int **pipe){
     crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
     down_semaforo(semid_gen, id, 0);
 
-    printf("Voy a esperar por la señal SIGSTART\n");
     sigsuspend(&oldset);
-    printf("Deje de esperar por SIGSTART\n");
     while(running_tirada){
         tirada = 0;
-        printf("Voy a esperar por SIGTHROW\n");
         sigsuspend(&oldset);
-        printf("Deje de esperar por SIGTHROW\n");
         read(pipe[id][READ], &tirada_type, sizeof(char));
-        printf("Lei la pipe\n");
         switch (tirada_type) {
             case REMONTAR:
                 tirada += (unsigned short) randNum(1, 7);
@@ -61,11 +59,9 @@ void proc_tirada(int id, int **pipe){
             default:
                 perror("Switch default case in file rutina_tirada.c");
         }
-        printf("Tirada:%d\n", tirada);
         msgqid = msgget(ftok(PATH, KEY_TIR_Q), 0);
         mensaje.mtype = id+1;
         mensaje.tirada = tirada;
-        printf("msgqid: %d, mensaj.mtype: %ld, tirada: %d\n",msgqid,mensaje.mtype, mensaje.tirada );
         if(msgsnd(msgqid, &mensaje, sizeof(struct msgtir) - sizeof(long), 0) == -1){
             perror("Couldn't send");
         }

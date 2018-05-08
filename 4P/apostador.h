@@ -1,7 +1,7 @@
 #ifndef APOSTADOR
 #define APOSTADOR
 
-#define MAX_APOS_NAME 10
+#define MAX_APOS_NAME 20
 #define APOS_ERROR -1
 
 typedef struct _Apostador{

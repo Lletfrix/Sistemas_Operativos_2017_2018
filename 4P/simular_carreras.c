@@ -199,6 +199,7 @@ int main(int argc, char* argv[]) {
         }
         cab_set_pid(&caballos[i], pid_aux);
         cab_set_id(&caballos[i], i);
+        sleep(1);
     }
 
     active = calloc(num_proc, sizeof(int));
@@ -224,14 +225,11 @@ int main(int argc, char* argv[]) {
     //TODO: Open pipe
     while(max_pos < longitud){
         min_pos = longitud;
-        printf("Mando señal a los caballos\n");
         for(i = 0; i < n_cab; ++i){
             kill(cab_get_pid(&caballos[i]), SIGTHROW);
         }
         /* Actualiza la posicion de cada caballo junto a la posicion maxima y minima */
-        printf("Voy hacer down del turno\n");
         down_semaforo(semid_turno, 0, 0);
-        printf("Hice down del turno\n");
         for(i = 0; i < n_cab; ++i){
             msgrcv(qid_tir, (struct msgbuf *) &mensaje_tirada, sizeof(struct msgtir) - sizeof(long),0, 0);
             pos_aux = cab_get_pos(&caballos[mensaje_tirada.mtype-1]) + mensaje_tirada.tirada;
@@ -246,7 +244,9 @@ int main(int argc, char* argv[]) {
         }
         up_semaforo(semid_mon, 0, 0);
         for (i = 0;  i < n_cab; ++i){
-            if(cab_get_pos(&caballos[i]) == min_pos){
+            if(min_pos == max_pos){
+                tirada_type = NORMAL;
+            }else if(cab_get_pos(&caballos[i]) == min_pos){
                 tirada_type = REMONTAR;
             }else if(cab_get_pos(&caballos[i]) == max_pos){
                 tirada_type = GANADORA;

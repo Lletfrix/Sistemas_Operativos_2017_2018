@@ -61,7 +61,6 @@ void apuesta_execute(Apuesta *a, char *path){
     for(i = 0; i < n_cab; ++i){
         cab_set_cot(&a->c[i], apuesta_total/cab_get_apostado(&a->c[i]));
     }
-
     up_multiple_semaforo(cab_mutex, n_cab, 0, active);
     _apuesta_print(fp, a, old_cot);
     fclose(fp);

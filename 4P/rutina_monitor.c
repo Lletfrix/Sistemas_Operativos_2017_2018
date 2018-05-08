@@ -98,6 +98,7 @@ void _monitor_carrera(int n_cab, Caballo *caballos){
     crear_semaforo(ftok(PATH, KEY_TUR_SEM), 1, &semid_turno);
     while(1){
         down_semaforo(semid_mon, 0 , 0);
+        printf("Posicion actual:\n");
             for (i = 0; i < n_cab; ++i) {
                 printf("\tCaballo: %u - Posicion %u - Ultima tirada %d\n", cab_get_id(&caballos[i])+1, cab_get_pos(&caballos[i]), cab_get_last_tir(&caballos[i]));
             }
@@ -119,11 +120,11 @@ void _monitor_post_carrera(int n_cab, Caballo *caballos, int n_apos, Apostador *
 
     for (i = 0; i < n_cab; ++i) {
         if(max_pos == cab_get_pos(&caballos[i])){
-            printf("El caballo %u es ganador.\n", cab_get_pos(&caballos[i]));
+            printf("El caballo %u es ganador.\n", cab_get_id(&caballos[i])+1);
         }
     }
 
-    qsort(apostadores, n_apos, sizeof(Apostador *), &apos_cmp_ben);
+    qsort(apostadores, n_apos, sizeof(Apostador), &apos_cmp_ben);
     if(n_apos < lim_aux){
         lim_aux = n_apos;
     }
@@ -137,6 +138,7 @@ void _monitor_post_carrera(int n_cab, Caballo *caballos, int n_apos, Apostador *
 void _monitor_fin(){
     int fd;
     char c;
+    sleep(1);
     fd = open(RUTA_FICHERO_APUESTAS,O_RDONLY);
     while(read(fd, &c, sizeof(char))){
         write(STDOUT_FILENO, &c, sizeof(char));
