@@ -17,16 +17,16 @@ void _tirada_handler(int sig);
 
 volatile bool running_tirada = true;
 
-void proc_tirada(int id, int **pipe){
+void proc_tirada(int id, int *pipe){
     sigset_t set, oldset;
     char tirada_type;
     unsigned short tirada;
-    struct msgtir mensaje;
+    struct msgtir mensaje = {0};
     int msgqid, semid_gen;
 
-    srand(time(NULL));
+    srand(getpid());
 
-    close(pipe[id][WRITE]);
+    close(pipe[WRITE]);
 
     signal(SIGTHROW, _tirada_handler);
     signal(SIGINT, _tirada_handler);
@@ -44,7 +44,7 @@ void proc_tirada(int id, int **pipe){
     while(running_tirada){
         tirada = 0;
         sigsuspend(&oldset);
-        read(pipe[id][READ], &tirada_type, sizeof(char));
+        read(pipe[READ], &tirada_type, sizeof(char));
         switch (tirada_type) {
             case REMONTAR:
                 tirada += (unsigned short) randNum(1, 7);

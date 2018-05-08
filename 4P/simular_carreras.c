@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     int qid_apues, qid_tir;
     int shmid_cab, shmid_apos;
     unsigned short sem_initial_val, *sem_cab_init;
-    int **fd;
+    int fd[10][2] = {0};
     int *active;
     char tirada_type;
     Caballo *caballos;
@@ -112,6 +112,7 @@ int main(int argc, char* argv[]) {
     if(inicializar_semaforo(semid_cab, sem_cab_init) == ERROR){
         perror("Error al inicializar el semaforo caballo mutex");
     }
+    free(sem_cab_init);
 
     if((qid_apues = msgget(ftok(PATH, KEY_APUES_Q), IPC_CREAT|0600)) == -1){
         perror("Error al crear la cola de mensajes APOSTADOR-GESTOR");
@@ -132,19 +133,6 @@ int main(int argc, char* argv[]) {
 
     caballos = shmat(shmid_cab, NULL, 0);
     apostadores = shmat(shmid_apos, NULL, 0);
-
-    fd = calloc(n_cab, sizeof(int *));
-    for (i = 0; i < n_cab; ++i) {
-        fd[i] = calloc(2, sizeof(int));
-    }
-
-    for(i = 0; i < n_cab; ++i){
-        if(pipe(fd[i]) == -1){
-            perror("Error al crear una pipe");
-            exit(EXIT_FAILURE);
-        }
-    }
-
 
     init_log();
 
@@ -183,8 +171,20 @@ int main(int argc, char* argv[]) {
             exit(EXIT_FAILURE);
         }
         apos_set_pid(&apostadores[i], pid_aux);
-        sleep(1);
     }
+
+    /*fd = calloc(n_cab, sizeof(int *));
+    for (i = 0; i < n_cab; ++i) {
+        fd[i] = calloc(2, sizeof(int));
+    }*/
+
+    for(i = 0; i < n_cab; ++i){
+        if(pipe(fd[i]) == -1){
+            perror("Error al crear una pipe");
+            exit(EXIT_FAILURE);
+        }
+    }
+
     /* Crea los procesos de tirada */
     for(i = 0; i < n_cab; ++i){
         pid_aux = fork();
@@ -194,12 +194,11 @@ int main(int argc, char* argv[]) {
             exit(EXIT_FAILURE);
         }
         if(!pid_aux){
-            proc_tirada(i, fd);
+            proc_tirada(i, fd[i]);
             exit(EXIT_FAILURE);
         }
         cab_set_pid(&caballos[i], pid_aux);
         cab_set_id(&caballos[i], i);
-        sleep(1);
     }
 
     active = calloc(num_proc, sizeof(int));
@@ -261,6 +260,17 @@ int main(int argc, char* argv[]) {
     //TODO: Liberar recursos
 
     while(wait(NULL) != -1);
+
+    msgctl(qid_apues, IPC_RMID, NULL);
+    msgctl(qid_tir, IPC_RMID, NULL);
+
+    borrar_semaforo(semid_cab);
+    borrar_semaforo(semid_turno);
+    borrar_semaforo(semid_mon);
+    borrar_semaforo(semid_gen);
+
+    shmctl(shmid_cab, IPC_RMID, NULL);
+    shmctl(shmid_apos, IPC_RMID, NULL);
 
     closelog();
     exit(EXIT_SUCCESS);

@@ -44,8 +44,8 @@ void proc_apostador(int id){
     strcpy(mensaje.nombre, name);
     mensaje.mtype = id+1;
 
-    srand(time(NULL));
-    
+    srand(getpid());
+
     crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
     down_semaforo(semid_gen, id + n_cab , 0);
     while(running_apostador){
