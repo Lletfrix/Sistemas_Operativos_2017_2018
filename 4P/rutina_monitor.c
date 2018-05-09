@@ -115,7 +115,7 @@ void _monitor_carrera(int n_cab, Caballo *caballos){
             }
         fflush(stdout);
         up_semaforo(semid_turno, 0, 0);
-        sleep(1); //Uncomment this line to make a more user-friendly output.
+        //sleep(1); //Uncomment this line to make a more user-friendly output.
         if(fin_carr){
             //return;
             break;

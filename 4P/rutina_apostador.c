@@ -29,7 +29,7 @@ void proc_apostador(int id){
     double apuesta;
     void _apos_handler();
     sigset_t mask;
-    
+
     apostadores = shmat(shmid_apos, NULL, 0);
 
     msgqid = msgget(ftok(PATH, KEY_APUES_Q), 0);
@@ -52,7 +52,7 @@ void proc_apostador(int id){
 
     while(running_apostador){
         mensaje.caballo = randNum(0, n_cab);
-        apuesta = randNum(0, apos_get_din_rest(&apostadores[id])/30);
+        apuesta = randNum(0, din/TIEMPO_PRE_CARR);
         mensaje.cantidad = apuesta;
         if(-1 == msgsnd(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0)){
             if(errno != EINTR){
