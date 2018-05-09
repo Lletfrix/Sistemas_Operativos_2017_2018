@@ -43,28 +43,28 @@ void _monitor_handler(int sig);
  *
  * Imprime los datos necesarios en el tiempo anterior a la carrera
  *
- * @param Caballos registrados
+ * @param c Caballos registrados
  */
-void _monitor_pre_carrera(Caballo *);
+void _monitor_pre_carrera(Caballo *c);
 
 /**
  * @brief Función auxiliar que define el comportamiento del proceso durante la carrera
  *
  * Imprime los datos necesarios durante la carrera
  *
- * @param Caballos registrados
+ * @param c Caballos registrados
  */
-void _monitor_carrera(Caballo *);
+void _monitor_carrera(Caballo *c);
 
 /**
  * @brief Función auxiliar que define el comportamiento del proceso tras la carrera
  *
  * Imprime los datos necesarios tras la carrera
  *
- * @param Caballos registrados
- * @param Apostadores registrados
+ * @param c Caballos registrados
+ * @param a Apostadores registrados
  */
-void _monitor_post_carrera(Caballo *, Apostador *);
+void _monitor_post_carrera(Caballo *c, Apostador *a);
 
 /**
  * @brief Función auxiliar que define el comportamiento del proceso al acabar la carrera
