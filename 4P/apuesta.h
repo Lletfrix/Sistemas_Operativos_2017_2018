@@ -28,9 +28,9 @@ Apuesta *apuesta_new();
  *
  * Elimina una apuesta dada, liberando su memoria
  *
- * @param Apuesta a eliminar
+ * @param a Apuesta a eliminar
  */
-void apuesta_destroy(Apuesta *);
+void apuesta_destroy(Apuesta *a);
 
 /**
  * @brief Inicializador de los valores de la apuesta

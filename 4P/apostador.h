@@ -75,8 +75,8 @@ Apostador *apos_set_ben(Apostador *a, double ben, int id);
  *
  * Nos permite establecer el pid a un apostador
  *
- * @param Apostador al que queremos establecer el pid
- * @param Pid del apostador
+ * @param a Apostador al que queremos establecer el pid
+ * @param id Pid del apostador
  * @return Apostador al que le hemos establecido el pid
  */
 Apostador *apos_set_pid(Apostador *a, pid_t id);
@@ -86,8 +86,8 @@ Apostador *apos_set_pid(Apostador *a, pid_t id);
  *
  * Incrementa el dinero del apostador una cierta cantidad
  *
- * @param Apostador al que incrementar el dinero disponible
- * @param Dinero que incrementar
+ * @param a Apostador al que incrementar el dinero disponible
+ * @param din Dinero que incrementar
  * @return Apostador al que le hemos incrementado el dinero
  */
 Apostador *apos_incr_din_rest(Apostador *a, double din);
@@ -97,7 +97,7 @@ Apostador *apos_incr_din_rest(Apostador *a, double din);
  *
  * Devuelve el nombre del apostador
  *
- * @param Apostador del que queremos saber el nombre
+ * @param a Apostador del que queremos saber el nombre
  * @return Nombre del apostador
  */
 char *apos_get_name(Apostador *a);
@@ -107,18 +107,18 @@ char *apos_get_name(Apostador *a);
  *
  * Devuelve el beneficio de un apostador para cierto caballo
  *
- * @param Apostador del que queremos saber el beneficio
- * @param Id del caballo
+ * @param a Apostador del que queremos saber el beneficio
+ * @param id Id del caballo
  * @return Beneficio del apostador para ese caballo
  */
-double apos_get_ben(Apostador *a, int ben);
+double apos_get_ben(Apostador *a, int id);
 
 /**
  * @brief Getter del pid de un apostador
  *
  * Devuelve el pid del apostador
  *
- * @param Apostador del que queremos saber el pid
+ * @param a Apostador del que queremos saber el pid
  * @return Pid del apostador
  */
 pid_t apos_get_pid(Apostador *a);
@@ -128,7 +128,7 @@ pid_t apos_get_pid(Apostador *a);
  *
  * Devuelve los beneficios totales del apostador
  *
- * @param Apostador del que queremos saber los beneficios
+ * @param a Apostador del que queremos saber los beneficios
  * @return Beneficio total del apostador
  */
 double apos_get_total(Apostador *a);
@@ -138,8 +138,8 @@ double apos_get_total(Apostador *a);
  *
  * Devuelve la diferencia entre los beneficios totales de dos apostadores
  *
- * @param Primer apostador
- * @param Segundo apostador
+ * @param a1 Primer apostador
+ * @param a2 Segundo apostador
  * @return Resta del beneficio del segundo con el beneficio del primero
  */
 int apos_cmp_ben(const void *a1, const void *a2);
@@ -149,7 +149,7 @@ int apos_cmp_ben(const void *a1, const void *a2);
  *
  * Actualiza los beneficios totales de un apostador mirando sus beneficios por caballo
  *
- * @param Apostador al que queremos actualizar los beneficios
+ * @param a Apostador al que queremos actualizar los beneficios
  * @return Apostador al que hemos actualizado los beneficios
  */
 Apostador *apos_refresh_total(Apostador *a);
