@@ -1,3 +1,12 @@
+/**
+ * @brief Rutina del proceso tirada
+ *
+ * Este fichero contiene el código fuente de la simulación de la tirada
+ * @file rutina_tirada.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 09-05-2018
+ */
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,9 +22,16 @@
 #include "semaforos.h"
 #include "rutina_tirada.h"
 
+/**
+ * @brief Manejador de señales del proceso tirada
+ *
+ * Establece las acciones que deberá ejecutar el proceso cuando reciba ciertas señales
+ *
+ * @param sig Señal recibida
+ */
 void _tirada_handler(int sig);
 
-volatile bool running_tirada = true;
+volatile bool running_tirada = true; /*!< Flag que indica si hay que seguir simulando tiradas*/
 
 void proc_tirada(int id, int *pipe){
     sigset_t set, oldset;

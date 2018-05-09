@@ -12,9 +12,6 @@
 #ifndef APUESTA
 #define APUESTA
 
-//TODO: Decide if this is necessary
-extern double apuesta_total;
-
 typedef struct _Apuesta Apuesta;
 
 /**
@@ -51,13 +48,13 @@ void apuesta_destroy(Apuesta *);
 Apuesta *apuesta_init(Apuesta *a, Apostador *apos, Caballo *c, int cab_id, unsigned short ventanilla, double cantidad);
 
 /**
- * @brief Añade una lista de señales a un set.
+ * @brief Ejecuta una apuesta
  *
- * Añade una lista de señales acabada en -1 al set dado por sigt.
- * Ejemplo de uso : sigaddset_var(sigt, SIGUSR1, SIGUSR2, SIGINT, -1);
+ * Ejecuta la apuesta a. Actualiza la cotizacion de los caballos, el estado del
+ * apostador y escribe en un fichero dado por filepath el registro de la apuesta
  *
- * @param sigt Puntero de tipo sigset_t. Set de señales.
- * @param sig Indices de las distinas señales. De extension variable. Debe terminar en -1.
+ * @param a Apuesta a ejecutar
+ * @param filepath Ruta del fichero donde guardar las apuestas
  */
 void apuesta_execute(Apuesta *a, char *filepath);
 

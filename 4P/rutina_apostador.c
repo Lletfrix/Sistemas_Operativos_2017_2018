@@ -1,3 +1,12 @@
+/**
+ * @brief Rutina del proceso apostador
+ *
+ * Este fichero contiene el código fuente de la simulación del apostador
+ * @file rutina_apostador.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 09-05-2018
+ */
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -17,13 +26,21 @@
 #include "rutina_apostador.h"
 #include "time.h"
 
-volatile bool running_apostador = true;
-Apostador *apostadores;
+volatile bool running_apostador = true; /*!< Bandera que indica si el apostador sigue apostando*/
+Apostador *apostadores; /*!< Apostadores registrados*/
+
+/**
+ * @brief Manejador de señales del apostador
+ *
+ * Define las acciones a realizar por el apostador en la recepción de ciertas señales
+ *
+ * @param sig Señal recibida
+ */
 void _apos_handler(int sig);
 
 void proc_apostador(int id){
     char name[MAX_APOS_NAME];
-    struct msgapues mensaje;
+    struct msgapues mensaje = {0};
     int shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos* sizeof(Apostador), SHM_W|SHM_R);
     int msgqid, semid_gen;
     double apuesta;

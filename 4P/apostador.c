@@ -1,3 +1,12 @@
+/**
+ * @brief Implementación de las primitivas del TAD apostador
+ *
+ * Este fichero contiene el código fuente del TAD apostador
+ * @file apostador.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 09-05-2018
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -42,10 +51,6 @@ Apostador *apos_set_pid(Apostador *a, pid_t pid){
     return a;
 }
 
-size_t apos_sizeof(){
-    return sizeof(Apostador);
-}
-
 char *apos_get_name(Apostador *a){
     if(!a){
         return NULL;
@@ -58,13 +63,6 @@ pid_t apos_get_pid(Apostador *a){
         return APOS_ERROR;
     }
     return a->pid;
-}
-
-double apos_get_din_rest(Apostador *a){
-    if(!a){
-        return APOS_ERROR;
-    }
-    return a->din_rest;
 }
 
 double apos_get_ben(Apostador *a, int id){

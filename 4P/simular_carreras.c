@@ -1,3 +1,12 @@
+/**
+ * @brief Rutina que simula la carrera
+ *
+ * Este fichero contiene el código fuente de la simulación de la carrera
+ * @file simular_carreras.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 09-05-2018
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <syslog.h>
@@ -25,17 +34,37 @@
 #include "rutina_tirada.h"
 #include "rutina_apostador.h"
 
-#define NUM_ARGS 6
+#define NUM_ARGS 6 /*!< Numero de argumentos de entrada*/
 
+/**
+ * @brief Función que muestra el uso del programa y los parámetros de entrada
+ *
+ * Imprime por pantalla el uso y los parámetros de entrada de la función
+ */
 void usage();
 void init_log();
+/**
+ * @brief Función que envía una señal a todos los hijos
+ *
+ * Envía la señal elegida a todos sus hijos
+ *
+ * @param sig Señal que queremos mandar a todos los hijos
+ */
 void _killall(int sig);
+/**
+ * @brief Manejador de señales de la simulación de la carrera
+ *
+ * Establece las acciones que deberá ejecutar el proceso cuando reciba ciertas señales
+ *
+ * @param sig Señal recibida
+ */
 void _sim_handler(int sig);
 
-volatile bool running = true;
-Caballo *caballos;
-Apostador *apostadores;
-pid_t gestor, monitor;
+volatile bool running_principal = true; /*!< Bandera que indica si el proceso sigue ejecutando la lógica de tiradas*/
+Caballo *caballos; /*!< Puntero al array de caballos*/
+Apostador *apostadores; /*!< Puntero al array de apostadores*/
+pid_t gestor; /*!< Id de proceso del gestor de apuestas*/
+pid_t monitor; /*!< Id de proceso del monitor*/
 
 int main(int argc, char* argv[]) {
     int i, longitud, pid_aux, max_pos, min_pos, pos_aux;
@@ -259,7 +288,7 @@ int main(int argc, char* argv[]) {
     sleep(1);
     max_pos = 0;
     /* Ejecuta su parte de la logica de la carrera */
-    while(max_pos < longitud && running){
+    while(max_pos < longitud && running_principal){
         min_pos = longitud;
         for(i = 0; i < n_cab; ++i){
             kill(cab_get_pid(&caballos[i]), SIGTHROW);
@@ -327,7 +356,7 @@ void _sim_handler(int sig){
     switch (sig) {
         case SIGINT:
             _killall(SIGINT);
-            running = false;
+            running_principal = false;
             break;
         default:
             return;

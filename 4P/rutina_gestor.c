@@ -1,3 +1,12 @@
+/**
+ * @brief Rutina del proceso gestor
+ *
+ * Este fichero contiene el código fuente de la simulación del gestor
+ * @file rutina_gestor.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 09-05-2018
+ */
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,17 +27,36 @@
 #include "apuesta.h"
 #include "semaforos.h"
 
+/**
+* @brief Informacion de la ventanilla
+*
+* Esta estructura guarda la informacion que se le envia a cada hilo ventanilla.
+*/
 struct _ventanilla{
-    Caballo *caballos;
-    Apostador *apostadores;
-    int ventanilla;
-    int msgqid;
+    Caballo *caballos; /*!< Todos los caballos registrados*/
+    Apostador *apostadores; /*!< Todos los caballos registrados*/
+    int ventanilla; /*!< Id de la ventanilla*/
+    int msgqid; /*!< Id de la cola de mensajes*/
 };
 
+/**
+ * @brief Función privada del gestor que realiza la recepcion de las apuestas
+ *
+ * Simula la recepción de apuestas y su gestión
+ *
+ * @param data Puntero a void que contiene toda la información necesaria para ejecutar la rutina
+ */
 void *_rutina_ventanilla(void *data);
 
 volatile bool end = false;
 
+/**
+ * @brief Manejador de señales del proceso gestor
+ *
+ * Establece las acciones que deberá ejecutar el proceso cuando reciba ciertas señales
+ *
+ * @param sig Señal recibida
+ */
 void _gestor_handler(int sig);
 
 void proc_gestor(){

@@ -12,16 +12,21 @@
 #ifndef APOSTADOR
 #define APOSTADOR
 
-#define MAX_APOS_NAME 20
-#define MAX_CAB 10
-#define APOS_ERROR -1
+#define MAX_APOS_NAME 20 /*!< Tamaño maximo del nombre del apostador*/
+#define MAX_CAB 10 /*!< Numero maximo de caballos*/
+#define APOS_ERROR -1 /*!< Codigo de error del apostador*/
 
+/**
+ * @brief Estructura del apostador
+ *
+ * Estructura que contiene la informacion del apostador.
+ */
 typedef struct _Apostador{
-    pid_t pid;
-    char nombre[MAX_APOS_NAME];
-    double ben[MAX_CAB];
-    double total;
-    double din_rest;
+    pid_t pid; /*!< Pid del apostador*/
+    char nombre[MAX_APOS_NAME]; /*!< Nombre del apostador*/
+    double ben[MAX_CAB]; /*!< Beneficios del apostador por cada caballo*/
+    double total; /*!< Beneficios totales del apostador*/
+    double din_rest; /*!< Dinero restante para apostar del apostador*/
 } Apostador;
 
 /**
@@ -37,33 +42,33 @@ Apostador *apos_new();
  *
  * Libera la memoria asignada al apostador dado
  *
- * @param Apostador que queremos eliminar
+ * @param a Apostador que queremos eliminar
  */
-void apos_destroy(Apostador *);
+void apos_destroy(Apostador *a);
 
 /**
  * @brief Inicializa los datos de un apostador
  *
  * Da nombre y dinero inicial al apostador dado
  *
- * @param Apostador al que queremos poner los datos
- * @param String que representa el nombre del apostador
- * @param Dinero inicial del apostador
+ * @param a Apostador al que queremos poner los datos
+ * @param nombre String que representa el nombre del apostador
+ * @param din Dinero inicial del apostador
  * @return Apostador inicializado
  */
-Apostador *apos_init(Apostador *, char *, double);
+Apostador *apos_init(Apostador *a, char *nombre, double din);
 
 /**
  * @brief Setter del beneficio del apostador para un cierto caballo
  *
  * Nos permite establecer el beneficio generado por un cierto caballo al apostador
  *
- * @param Apostador al que queremos establecer el beneficio
- * @param Beneficio del apostador
- * @param Id del caballo del que proviene el beneficio
+ * @param a Apostador al que queremos establecer el beneficio
+ * @param ben Beneficio del apostador
+ * @param id Id del caballo del que proviene el beneficio
  * @return Apostador al que le hemos establecido el beneficio de un caballo
  */
-Apostador *apos_set_ben(Apostador *, double, int);
+Apostador *apos_set_ben(Apostador *a, double ben, int id);
 
 /**
  * @brief Setter del pid de un apostador
@@ -74,7 +79,7 @@ Apostador *apos_set_ben(Apostador *, double, int);
  * @param Pid del apostador
  * @return Apostador al que le hemos establecido el pid
  */
-Apostador *apos_set_pid(Apostador *, pid_t);
+Apostador *apos_set_pid(Apostador *a, pid_t id);
 
 /**
  * @brief Incrementa el dinero disponible del apostador
@@ -85,16 +90,7 @@ Apostador *apos_set_pid(Apostador *, pid_t);
  * @param Dinero que incrementar
  * @return Apostador al que le hemos incrementado el dinero
  */
-Apostador *apos_incr_din_rest(Apostador *, double);
-
-/**
- * @brief Devuelve el tamaño de la estructura de apostador
- *
- * Devuelve el tamaño de la estructura de apostador en bytes
- *
- * @return Tamaño de la estructura
- */
-size_t apos_sizeof();
+Apostador *apos_incr_din_rest(Apostador *a, double din);
 
 /**
  * @brief Getter del nombre del apostador
@@ -104,7 +100,7 @@ size_t apos_sizeof();
  * @param Apostador del que queremos saber el nombre
  * @return Nombre del apostador
  */
-char *apos_get_name(Apostador *);
+char *apos_get_name(Apostador *a);
 
 /**
  * @brief Getter del beneficio de un apostador para cierto caballo
@@ -115,7 +111,7 @@ char *apos_get_name(Apostador *);
  * @param Id del caballo
  * @return Beneficio del apostador para ese caballo
  */
-double apos_get_ben(Apostador *, int);
+double apos_get_ben(Apostador *a, int ben);
 
 /**
  * @brief Getter del pid de un apostador
@@ -125,7 +121,7 @@ double apos_get_ben(Apostador *, int);
  * @param Apostador del que queremos saber el pid
  * @return Pid del apostador
  */
-pid_t apos_get_pid(Apostador *);
+pid_t apos_get_pid(Apostador *a);
 
 /**
  * @brief Getter de los beneficios totales del apostador
@@ -135,17 +131,7 @@ pid_t apos_get_pid(Apostador *);
  * @param Apostador del que queremos saber los beneficios
  * @return Beneficio total del apostador
  */
-double apos_get_total(Apostador *);
-
-/**
- * @brief Getter del dinero restante del apostador
- *
- * Devuelve el dinero disponible del apostador
- *
- * @param Apostador del que queremos saber el dinero restante
- * @return Dinero restante
- */
-double apos_get_din_rest(Apostador *);
+double apos_get_total(Apostador *a);
 
 /**
  * @brief Compara los beneficios totales de dos apostadores
@@ -156,7 +142,7 @@ double apos_get_din_rest(Apostador *);
  * @param Segundo apostador
  * @return Resta del beneficio del segundo con el beneficio del primero
  */
-int apos_cmp_ben(const void *, const void *);
+int apos_cmp_ben(const void *a1, const void *a2);
 
 /**
  * @brief Refresca los beneficios totales de un apostador

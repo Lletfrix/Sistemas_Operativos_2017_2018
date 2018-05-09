@@ -1,3 +1,12 @@
+/**
+ * @brief Implementación de las primitivas del TAD caballo
+ *
+ * Este fichero contiene el código fuente del TAD caballo
+ * @file caballo.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 09-05-2018
+ */
 #include <stdlib.h>
 
 #include "caballo.h"
@@ -63,10 +72,6 @@ unsigned short cab_get_last_tir(Caballo *c){
         return CAB_ERROR;
     }
     return c->last_tir;
-}
-
-size_t cab_sizeof(){
-    return sizeof(Caballo);
 }
 
 unsigned short cab_get_id(Caballo *c){

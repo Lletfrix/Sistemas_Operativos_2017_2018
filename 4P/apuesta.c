@@ -1,3 +1,12 @@
+/**
+ * @brief Implementación de las primitivas del TAD apuesta
+ *
+ * Este fichero contiene el código fuente del TAD apuesta
+ * @file apuesta.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 09-05-2018
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -9,18 +18,30 @@
 #include "semaforos.h"
 #include "sim_carr_lib.h"
 
-
+/**
+ * @brief Datos de la apuesta
+ *
+ * Esta estructura guarda la información de una apuesta.
+ */
 struct _Apuesta{
-    Apostador *apos;
-    Caballo* c;
-    int cab_id;
-    unsigned short ventanilla;
-    double cantidad;
+    Apostador *apos; /*!< Apostador que realiza la apuesta*/
+    Caballo* c; /*!< Caballo por el que se apuesta*/
+    int cab_id; /*!< Identificador del caballo*/
+    unsigned short ventanilla; /*!< Id de la ventanilla asignada a la apuesta*/
+    double cantidad; /*!< Cantidad apostada*/
 };
 
-double apuesta_total = 0;
+double apuesta_total = 0;/*!< Variable que contiene el total de todas las apuestas realizadas hasta el momento*/
 
-
+/**
+ * @brief Función privada que guarda los datos de una apuesta
+ *
+ * Imprime los datos de la apuesta en un fichero dado
+ *
+ * @param Fichero en el que escribimos los datos
+ * @param Apuesta de la que queremos guardar los datos
+ * @param Cotización anterior del caballo
+ */
 void _apuesta_print(FILE *, Apuesta *, double);
 
 Apuesta *apuesta_new(){

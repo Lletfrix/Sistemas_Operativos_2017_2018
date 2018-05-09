@@ -1,3 +1,12 @@
+/**
+ * @brief Rutina del proceso monitor
+ *
+ * Este fichero contiene el código fuente de la simulación del monitor
+ * @file rutina_monitor.c
+ * @author Rafael Sánchez & Sergio Galán
+ * @version 1.0
+ * @date 09-05-2018
+ */
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,16 +27,54 @@
 #include "apuesta.h"
 #include "semaforos.h"
 
-#define MAX_APOS_PRINT 10
+#define MAX_APOS_PRINT 10 /*!< Numero maximo de apostadores que imprimir en el ranking al finalizar la carrera*/
 
+/**
+ * @brief Manejador de señales del proceso monitor
+ *
+ * Establece las acciones que deberá ejecutar el proceso cuando reciba ciertas señales
+ *
+ * @param sig Señal recibida
+ */
 void _monitor_handler(int sig);
-void _monitor_pre_carrera(int , Caballo *);
-void _monitor_carrera(int , Caballo *);
-void _monitor_post_carrera(int , Caballo *, int , Apostador *);
+
+/**
+ * @brief Función auxiliar que define el comportamiento del proceso antes de la carrera
+ *
+ * Imprime los datos necesarios en el tiempo anterior a la carrera
+ *
+ * @param Caballos registrados
+ */
+void _monitor_pre_carrera(Caballo *);
+
+/**
+ * @brief Función auxiliar que define el comportamiento del proceso durante la carrera
+ *
+ * Imprime los datos necesarios durante la carrera
+ *
+ * @param Caballos registrados
+ */
+void _monitor_carrera(Caballo *);
+
+/**
+ * @brief Función auxiliar que define el comportamiento del proceso tras la carrera
+ *
+ * Imprime los datos necesarios tras la carrera
+ *
+ * @param Caballos registrados
+ * @param Apostadores registrados
+ */
+void _monitor_post_carrera(Caballo *, Apostador *);
+
+/**
+ * @brief Función auxiliar que define el comportamiento del proceso al acabar la carrera
+ *
+ * Imprime los datos necesarios al acabar la carrera
+ */
 void _monitor_fin();
 
-volatile bool fin_pre_carr = false;
-volatile bool fin_carr = false;
+volatile bool fin_pre_carr = false; /*!< Flag que indica el fin del tiempo de pre carrera*/
+volatile bool fin_carr = false; /*!< Flag que indica el fin de la carrera*/
 
 void proc_monitor(){
     int shmid_cab, shmid_apos, semid_gen;
@@ -52,10 +99,10 @@ void proc_monitor(){
     down_semaforo(semid_gen, n_cab + n_apos, 0);
 
     sigprocmask(SIG_BLOCK, &set_start, NULL);
-    _monitor_pre_carrera(n_cab, caballos);
+    _monitor_pre_carrera(caballos);
     sigprocmask(SIG_SETMASK, &set_int, NULL);
-    _monitor_carrera(n_cab, caballos);
-    _monitor_post_carrera(n_cab, caballos, n_apos, apostadores);
+    _monitor_carrera(caballos);
+    _monitor_post_carrera(caballos, apostadores);
     _monitor_fin();
     exit(EXIT_FAILURE);
 }
@@ -68,16 +115,12 @@ void _monitor_handler(int sig){
         case SIGINT:
             fin_carr = true;
             return;
-        case SIGABRT:
-            //TODO:
-            //fin_post_carr = true;
-            return;
         default:
             return;
     }
 }
 
-void _monitor_pre_carrera(int n_cab, Caballo *caballos){
+void _monitor_pre_carrera(Caballo *caballos){
     int i = TIEMPO_PRE_CARR, j, caballo_mutex;
     int active[] = {0,1,2,3,4,5,6,7,8,9};
     crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
@@ -101,7 +144,7 @@ void _monitor_pre_carrera(int n_cab, Caballo *caballos){
     }
 }
 
-void _monitor_carrera(int n_cab, Caballo *caballos){
+void _monitor_carrera(Caballo *caballos){
     int i;
     int semid_mon, semid_turno;
     crear_semaforo(ftok(PATH, KEY_MON_SEM), 1, &semid_mon);
@@ -117,7 +160,6 @@ void _monitor_carrera(int n_cab, Caballo *caballos){
         up_semaforo(semid_turno, 0, 0);
         //sleep(1); //Uncomment this line to make a more user-friendly output.
         if(fin_carr){
-            //return;
             break;
         }
     }
@@ -127,7 +169,7 @@ void _monitor_carrera(int n_cab, Caballo *caballos){
     }
 }
 
-void _monitor_post_carrera(int n_cab, Caballo *caballos, int n_apos, Apostador *apostadores){
+void _monitor_post_carrera(Caballo *caballos, Apostador *apostadores){
     int i, max_pos = 0, aux_pos, lim_aux = MAX_APOS_PRINT, j = 0, n_perdedores;
     int perdedores[MAX_CAB] = {-1};
 
