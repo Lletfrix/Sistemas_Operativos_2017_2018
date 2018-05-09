@@ -19,7 +19,7 @@
 #define PATH "/bin/bash"
 #define MAX_NAME 10
 #define RUTA_FICHERO_APUESTAS "text/apuestas.txt"
-#define TIEMPO_PRE_CARR 3
+#define TIEMPO_PRE_CARR 30
 #define MAX_APOS 100
 
 extern int num_proc, n_cab, n_apos, n_vent;

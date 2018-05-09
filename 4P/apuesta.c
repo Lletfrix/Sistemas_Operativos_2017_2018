@@ -70,5 +70,5 @@ void _apuesta_print(FILE *fp, Apuesta *a, double old_cot){
     if(!fp || !a){
         return;
     }
-    fprintf(fp, "Apostador: %s, Ventanilla: %hu, Caballo: %hu, Cotizacion: %lf, Cantidad %lf\n", apos_get_name(a->apos),a->ventanilla, cab_get_id(&a->c[a->cab_id])+1, old_cot, a->cantidad);
+    fprintf(fp, "Apostador: %s, Ventanilla: %hu, Caballo: %hu, Cotizacion: %lf, Cantidad %lf\n", apos_get_name(a->apos),a->ventanilla+1, cab_get_id(&a->c[a->cab_id])+1, old_cot, a->cantidad);
 }

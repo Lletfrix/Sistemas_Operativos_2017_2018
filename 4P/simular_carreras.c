@@ -32,6 +32,7 @@ void init_log();
 void _killall(int sig);
 void _sim_handler(int sig);
 
+volatile bool running = true;
 Caballo *caballos;
 Apostador *apostadores;
 pid_t gestor, monitor;
@@ -77,6 +78,9 @@ int main(int argc, char* argv[]) {
         exit(EXIT_FAILURE);
     }
     num_proc = n_cab+n_apos+2;
+
+    /* Resets necessary file */
+    fclose(fopen(RUTA_FICHERO_APUESTAS,"w"));
     /* Reserva de IPCS */
     //TODO: Añadir liberacion de recursos al control de errores
     if(crear_semaforo(ftok(PATH, KEY_MON_SEM), 1, &semid_mon) == ERROR){
@@ -255,7 +259,7 @@ int main(int argc, char* argv[]) {
     sleep(1);
     max_pos = 0;
     /* Ejecuta su parte de la logica de la carrera */
-    while(max_pos < longitud){
+    while(max_pos < longitud && running){
         min_pos = longitud;
         for(i = 0; i < n_cab; ++i){
             kill(cab_get_pid(&caballos[i]), SIGTHROW);
@@ -323,6 +327,7 @@ void _sim_handler(int sig){
     switch (sig) {
         case SIGINT:
             _killall(SIGINT);
+            running = false;
             break;
         default:
             return;
