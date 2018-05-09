@@ -9,7 +9,6 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -102,7 +101,7 @@ int main(int argc, char* argv[]) {
     n_vent = atoi(argv[4]);
     din = atof(argv[5]);
 
-    if(n_cab > MAX_CAB || n_apos > MAX_APOS){
+    if(n_cab > MAX_CAB || n_apos > MAX_APOS || n_cab <= 0 || n_apos <= 0 || longitud <= 0 || n_vent <= 0 || din <= 0.0){
         usage();
         exit(EXIT_FAILURE);
     }
