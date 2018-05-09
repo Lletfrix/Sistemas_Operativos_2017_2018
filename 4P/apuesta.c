@@ -56,7 +56,7 @@ void apuesta_execute(Apuesta *a, char *path){
 
     apuesta_total += a->cantidad; //TODO: Mirar si esto va aqui
     old_cot = cab_get_cot(&a->c[a->cab_id]);
-    apos_set_ben(a->apos, old_cot*a->cantidad);
+    apos_set_ben(a->apos, apos_get_ben(a->apos, a->cab_id) + old_cot*a->cantidad, a->cab_id);
     cab_incr_apostado(&a->c[a->cab_id], a->cantidad);
     for(i = 0; i < n_cab; ++i){
         cab_set_cot(&a->c[i], apuesta_total/cab_get_apostado(&a->c[i]));
@@ -70,5 +70,5 @@ void _apuesta_print(FILE *fp, Apuesta *a, double old_cot){
     if(!fp || !a){
         return;
     }
-    fprintf(fp, "Apostador: %s, Ventanilla: %hu, Caballo: %hu, Cotizacion: %lf, Cantidad %lf\n", apos_get_name(a->apos),a->ventanilla, cab_get_id(&a->c[a->cab_id]), old_cot, a->cantidad);
+    fprintf(fp, "Apostador: %s, Ventanilla: %hu, Caballo: %hu, Cotizacion: %lf, Cantidad %lf\n", apos_get_name(a->apos),a->ventanilla, cab_get_id(&a->c[a->cab_id])+1, old_cot, a->cantidad);
 }

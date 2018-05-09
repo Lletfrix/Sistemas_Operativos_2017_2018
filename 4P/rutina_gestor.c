@@ -8,6 +8,7 @@
 #include <sys/msg.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include "rutina_gestor.h"
@@ -26,7 +27,7 @@ struct _ventanilla{
 
 void *_rutina_ventanilla(void *data);
 
-volatile bool end = false;;
+volatile bool end = false;
 
 void _gestor_handler(int sig);
 
@@ -42,6 +43,7 @@ void proc_gestor(){
     signal(SIGABRT, _gestor_handler);
     signal(SIGINT, _gestor_handler);
     signal(SIGSTART, _gestor_handler);
+    signal(SIGUSR2, _gestor_handler);
 
 
     /* Inicia el valor de apuesta de cada caballo */
@@ -49,7 +51,7 @@ void proc_gestor(){
     caballos = shmat(cab_shmid, NULL, 0);
     for (i = 0; i < n_cab; ++i){
         cab_incr_apostado(&caballos[i], 1.0 - cab_get_apostado(&caballos[i]));
-        cab_set_cot(&caballos[i], apuesta_total/cab_get_apostado(&caballos[i]));
+        cab_set_cot(&caballos[i], 1.0);
     }
 
     //crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
@@ -64,8 +66,6 @@ void proc_gestor(){
 
     threads = malloc(n_vent*sizeof(pthread_t));
 
-
-
     for(i = 0, mockthread = threads; i < n_vent; ++i, ++mockthread){
         //TODO: Error handling
         e_ventanilla = calloc(1, sizeof(struct _ventanilla));
@@ -79,8 +79,12 @@ void proc_gestor(){
     pause();
     for(i = 0, mockthread = threads; i < n_vent; ++i, ++mockthread){
         //TODO: Ver si es mejor hacerlo con un while
-        pthread_cancel(*mockthread);
+        pthread_kill(*mockthread, SIGUSR2);
+        pthread_join(*mockthread, NULL);
     }
+
+    free(threads);
+
     exit(EXIT_SUCCESS);
 }
 
@@ -89,8 +93,10 @@ void _gestor_handler(int sig){
         case SIGSTART:
             return;
         case SIGABRT:
-
             exit(EXIT_SUCCESS);
+        case SIGUSR2:
+            end = true;
+            break;
         default:
             return;
     }
@@ -105,9 +111,6 @@ void *_rutina_ventanilla(void *data){
     int ventanilla;
     int msgqid;
 
-    pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-    pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
-
     /* Copia el contenido de los parametros de entrada para poder liberar la memoria */
     caballos = datos.caballos;
     apostadores = datos.apostadores;
@@ -117,14 +120,17 @@ void *_rutina_ventanilla(void *data){
 
     /* Recibe un mensaje */
     while(1){
-        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
         if(-1 == msgrcv(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0, 0)){
-            perror("Couldn't recieve menssage");
+            if(errno != EINTR){
+                perror("Couldn't recieve message");
+            }
         };
-        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
         apuesta = apuesta_init(apuesta_new(), &apostadores[mensaje.mtype-1], caballos, mensaje.caballo, ventanilla, mensaje.cantidad);
         apuesta_execute(apuesta, RUTA_FICHERO_APUESTAS);
         apuesta_destroy(apuesta);
+        if(end){
+            pthread_exit(NULL);
+        }
     }
     return NULL;
 }

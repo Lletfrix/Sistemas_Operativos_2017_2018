@@ -86,6 +86,7 @@ void _monitor_pre_carrera(int n_cab, Caballo *caballos){
             --i;
         }
         if(fin_pre_carr){
+            printf("Fin del tiempo de apuestas.\n");
             return;
         }
     }
@@ -96,13 +97,16 @@ void _monitor_carrera(int n_cab, Caballo *caballos){
     int semid_mon, semid_turno;
     crear_semaforo(ftok(PATH, KEY_MON_SEM), 1, &semid_mon);
     crear_semaforo(ftok(PATH, KEY_TUR_SEM), 1, &semid_turno);
+    printf("Empezando tiradas\n");
     while(1){
         down_semaforo(semid_mon, 0 , 0);
         printf("Posicion actual:\n");
             for (i = 0; i < n_cab; ++i) {
                 printf("\tCaballo: %u - Posicion %u - Ultima tirada %d\n", cab_get_id(&caballos[i])+1, cab_get_pos(&caballos[i]), cab_get_last_tir(&caballos[i]));
             }
+        fflush(stdout);
         up_semaforo(semid_turno, 0, 0);
+        //sleep(1); //Uncomment this line to make a more user-friendly output.
         if(fin_carr){
             return;
         }
@@ -110,7 +114,8 @@ void _monitor_carrera(int n_cab, Caballo *caballos){
 }
 
 void _monitor_post_carrera(int n_cab, Caballo *caballos, int n_apos, Apostador *apostadores){
-    int i, max_pos = 0, aux_pos, lim_aux = MAX_APOS_PRINT;
+    int i, max_pos = 0, aux_pos, lim_aux = MAX_APOS_PRINT, j = 0, n_perdedores;
+    int perdedores[MAX_CAB] = {-1};
 
     for (i = 0; i < n_cab; ++i) {
         if(max_pos < (aux_pos=cab_get_pos(&caballos[i]))){
@@ -121,7 +126,20 @@ void _monitor_post_carrera(int n_cab, Caballo *caballos, int n_apos, Apostador *
     for (i = 0; i < n_cab; ++i) {
         if(max_pos == cab_get_pos(&caballos[i])){
             printf("El caballo %u es ganador.\n", cab_get_id(&caballos[i])+1);
+        }else{
+            perdedores[j] = cab_get_id(&caballos[i]);
+            ++j;
         }
+    }
+    n_perdedores = j;
+    for(i = 0; i < n_perdedores; ++i){
+        for (j = 0; j < n_apos; ++j){
+            apos_set_ben(&apostadores[j], 0, perdedores[i]);
+        }
+    }
+
+    for(i = 0; i < n_apos; ++i){
+        apos_refresh_total(&apostadores[i]);
     }
 
     qsort(apostadores, n_apos, sizeof(Apostador), &apos_cmp_ben);
@@ -129,7 +147,7 @@ void _monitor_post_carrera(int n_cab, Caballo *caballos, int n_apos, Apostador *
         lim_aux = n_apos;
     }
     for(i = 0; i < lim_aux; ++i){
-        printf("%d) %s: %f\n", i+1, apos_get_name(&apostadores[i]), apos_get_ben(&apostadores[i]));
+        printf("%d) %s: %f\n", i+1, apos_get_name(&apostadores[i]), apos_get_total(&apostadores[i]));
     }
 
     return;

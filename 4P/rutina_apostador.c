@@ -8,6 +8,7 @@
 #include <sys/ipc.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #include "mylib.h"
 #include "apostador.h"
@@ -53,7 +54,9 @@ void proc_apostador(int id){
         apuesta = randNum(0, apos_get_din_rest(&apostadores[id])/30);
         mensaje.cantidad = apuesta;
         if(-1 == msgsnd(msgqid, &mensaje, sizeof(struct msgapues) - sizeof(long), 0)){
-            perror("Couldn't send message");
+            if(errno != EINTR){
+                perror("Couldn't send message");
+            }
         }
         apos_incr_din_rest(&apostadores[id], -1*apuesta);
         sleep(1);

@@ -14,9 +14,9 @@
 #include <signal.h>
 #include <unistd.h>
 
+#include "sim_carr_lib.h"
 #include "mylib.h"
 #include "semaforos.h"
-#include "sim_carr_lib.h"
 #include "caballo.h"
 #include "apostador.h"
 #include "apuesta.h"
@@ -26,9 +26,6 @@
 #include "rutina_apostador.h"
 
 #define NUM_ARGS 6
-#define MAX_CAB 10
-#define MAX_APOS 100
-#define APOS_TYPE 1
 
 void usage();
 void init_log();
@@ -40,7 +37,7 @@ int main(int argc, char* argv[]) {
     int qid_apues, qid_tir;
     int shmid_cab, shmid_apos;
     unsigned short sem_initial_val, *sem_cab_init;
-    int fd[10][2] = {0};
+    int fd[MAX_CAB][2] = {0};
     int *active;
     char tirada_type;
     Caballo *caballos;
@@ -212,9 +209,7 @@ int main(int argc, char* argv[]) {
     /* Espera a que empiece la carrera */
     sleep(TIEMPO_PRE_CARR);
 
-    printf("Voy a comenzar la carrera\n");
     _killall(SIGSTART, monitor, gestor, caballos, n_cab, apostadores, n_apos);
-    printf("Mande señal SIGSTART\n");
     for (i = 0;  i < n_cab; ++i){
         tirada_type = NORMAL;
         write(fd[i][WRITE], &tirada_type, sizeof(char));
