@@ -39,12 +39,20 @@ void proc_gestor(){
     pthread_t *threads, *mockthread;
     struct _ventanilla *e_ventanilla;
     void _gestor_handler();
+    sigset_t mask, set_start;
 
-    signal(SIGABRT, _gestor_handler);
-    signal(SIGINT, _gestor_handler);
     signal(SIGSTART, _gestor_handler);
+    signal(SIGINT, _gestor_handler);
     signal(SIGUSR2, _gestor_handler);
 
+    /* Establece la máscara de señales */
+    sigfillset(&mask);
+    sigdelset(&mask, SIGSTART);
+    sigdelset(&mask, SIGUSR2);
+    sigprocmask(SIG_BLOCK, &mask, NULL);
+
+    sigemptyset(&set_start);
+    sigaddset(&set_start, SIGSTART);
 
     /* Inicia el valor de apuesta de cada caballo */
     cab_shmid = shmget(ftok(PATH, KEY_CAB_SHM), n_cab * sizeof(Caballo), 0);
@@ -54,9 +62,9 @@ void proc_gestor(){
         cab_set_cot(&caballos[i], 1.0);
     }
 
-    //crear_semaforo(ftok(PATH, KEY_CAB_SEM), n_cab, &caballo_mutex);
     crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
     down_semaforo(semid_gen, n_apos+n_cab+1, 0);
+
     /* El dinero a pagar de cada apostador ya se inicializa cuando se ejecuta la inicializacion en rutina_apostador */
     apos_shmid = shmget(ftok(PATH, KEY_APOS_SHM),n_apos * sizeof(Apostador), 0);
     apostadores = shmat(apos_shmid, NULL, 0);
@@ -75,10 +83,9 @@ void proc_gestor(){
         e_ventanilla->ventanilla = i;
         pthread_create(mockthread, NULL, _rutina_ventanilla, e_ventanilla);
     }
-    //TODO: Aplicar mascara para que solo espere por SIGSTART o SIGABRT. Cambiar el pause.
-    pause();
+
+    sigsuspend(&set_start);
     for(i = 0, mockthread = threads; i < n_vent; ++i, ++mockthread){
-        //TODO: Ver si es mejor hacerlo con un while
         pthread_kill(*mockthread, SIGUSR2);
         pthread_join(*mockthread, NULL);
     }
@@ -92,8 +99,8 @@ void _gestor_handler(int sig){
     switch (sig) {
         case SIGSTART:
             return;
-        case SIGABRT:
-            exit(EXIT_SUCCESS);
+        case SIGINT:
+            return;
         case SIGUSR2:
             end = true;
             break;

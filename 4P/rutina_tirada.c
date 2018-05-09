@@ -30,11 +30,10 @@ void proc_tirada(int id, int *pipe){
 
     signal(SIGTHROW, _tirada_handler);
     signal(SIGINT, _tirada_handler);
-    signal(SIGABRT, _tirada_handler);
     signal(SIGSTART, _tirada_handler);
 
     sigemptyset(&set);
-    sigaddset_var(&set, SIGTHROW, SIGINT, SIGABRT, SIGSTART,-1);
+    sigaddset_var(&set, SIGTHROW, SIGINT, SIGSTART,-1);
     sigprocmask(SIG_BLOCK, &set, &oldset);
 
     crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
@@ -71,9 +70,6 @@ void proc_tirada(int id, int *pipe){
 
 void _tirada_handler(int sig){
     switch (sig) {
-        case SIGABRT:
-        //TODO: Check if free resources is needed
-            exit(EXIT_SUCCESS);
         case SIGTHROW:
         case SIGSTART:
             return;

@@ -37,14 +37,23 @@ void proc_monitor(){
     caballos = shmat(shmid_cab, NULL, 0);
     shmid_apos = shmget(ftok(PATH, KEY_APOS_SHM), n_apos * sizeof(Apostador), 0);
     apostadores = shmat(shmid_apos, NULL, 0);
+    sigset_t set_start, set_int;
 
     signal(SIGSTART, _monitor_handler);
     signal(SIGINT, _monitor_handler);
-    signal(SIGABRT, _monitor_handler);
+
+    sigfillset(&set_start);
+    sigdelset(&set_start, SIGSTART);
+
+    sigfillset(&set_int);
+    sigdelset(&set_int, SIGINT);
+
     crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
     down_semaforo(semid_gen, n_cab + n_apos, 0);
-    usleep(500);
+
+    sigprocmask(SIG_BLOCK, &set_start, NULL);
     _monitor_pre_carrera(n_cab, caballos);
+    sigprocmask(SIG_SETMASK, &set_int, NULL);
     _monitor_carrera(n_cab, caballos);
     _monitor_post_carrera(n_cab, caballos, n_apos, apostadores);
     _monitor_fin();

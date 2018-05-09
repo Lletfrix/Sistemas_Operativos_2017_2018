@@ -28,15 +28,9 @@ void proc_apostador(int id){
     int msgqid, semid_gen;
     double apuesta;
     void _apos_handler();
-
+    sigset_t mask;
+    
     apostadores = shmat(shmid_apos, NULL, 0);
-
-    signal(SIGSTART, _apos_handler);
-    signal(SIGINT, _apos_handler);
-    signal(SIGABRT, _apos_handler);
-    /*sigemptyset(set);
-    sigaddset_var(set, SIGSTART, SIGINT, SIGABRT, -1);
-    sigprocmask(SIG_BLOCK, set, oldset);*/
 
     msgqid = msgget(ftok(PATH, KEY_APUES_Q), 0);
 
@@ -47,8 +41,15 @@ void proc_apostador(int id){
 
     srand(getpid());
 
+    /* Establece la máscara de señales */
+    sigfillset(&mask);
+    sigdelset(&mask, SIGSTART);
+    sigprocmask(SIG_BLOCK, &mask, NULL);
+    signal(SIGSTART, _apos_handler);
+
     crear_semaforo(ftok(PATH, KEY_GEN_SEM), num_proc, &semid_gen);
     down_semaforo(semid_gen, id + n_cab , 0);
+
     while(running_apostador){
         mensaje.caballo = randNum(0, n_cab);
         apuesta = randNum(0, apos_get_din_rest(&apostadores[id])/30);
@@ -66,13 +67,8 @@ void proc_apostador(int id){
 void _apos_handler(int sig){
     switch (sig) {
         case SIGSTART:
-            return;
-        case SIGABRT:
-            shmdt(apostadores);
-            exit(EXIT_SUCCESS);
-        case SIGINT:
-        //TODO: Revisar si tiene que hacer esto.
             running_apostador = false;
+            break;
         default:
             return;
     }
