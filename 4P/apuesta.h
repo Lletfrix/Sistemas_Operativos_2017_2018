@@ -12,7 +12,7 @@
 #ifndef APUESTA
 #define APUESTA
 
-typedef struct _Apuesta Apuesta;
+typedef struct _Apuesta Apuesta; /*!< Define el tipo de datos Apuesta como la estructura de la misma*/
 
 /**
  * @brief Constructor de una apuesta

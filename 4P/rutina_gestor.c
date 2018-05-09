@@ -48,7 +48,7 @@ struct _ventanilla{
  */
 void *_rutina_ventanilla(void *data);
 
-volatile bool end = false;
+volatile bool end = false; /*!< Booleano que representa si el gestor tiene que acabar o no*/
 
 /**
  * @brief Manejador de señales del proceso gestor

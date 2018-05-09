@@ -36,6 +36,18 @@ $(EJGEN) : $(LIBS)
 $(LIBS):
 	$(CC) $(CFLAGS) -o $(LIB_DIR)/$@.o -c $@.c $(LDLIBS)
 
+.PHONY: memtest
+memtest: $(EXE)
+	@echo "Ejecutando simulador con Valgrind"
+	@echo "#---------------------------"
+	valgrind --leak-check=full ./build/simular_carreras 2 100 2 3 1000.0
+
+.PHONY: test
+test: $(EXE)
+	@echo "Ejecutando simulador"
+	@echo "#---------------------------"
+	./build/simular_carreras 2 100 2 3 1000.0
+
 .PHONY: dist
 dist:
 	zip -r $(ZIP_NAME).zip $(DIST_PATH)

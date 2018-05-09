@@ -41,7 +41,6 @@
  * Imprime por pantalla el uso y los parámetros de entrada de la función
  */
 void usage();
-void init_log();
 /**
  * @brief Función que envía una señal a todos los hijos
  *
@@ -65,6 +64,15 @@ Apostador *apostadores; /*!< Puntero al array de apostadores*/
 pid_t gestor; /*!< Id de proceso del gestor de apuestas*/
 pid_t monitor; /*!< Id de proceso del monitor*/
 
+/**
+ * @brief main
+ *
+ * Programa principal del simulador de carreras.
+ *
+ * @param argc Número de argumentos de entrada
+ * @param argv Argumentos de entrada
+ * @return Valor de salida del programa
+ */
 int main(int argc, char* argv[]) {
     int i, longitud, pid_aux, max_pos, min_pos, pos_aux;
     int semid_mon, semid_turno, semid_cab, semid_gen;
@@ -222,8 +230,6 @@ int main(int argc, char* argv[]) {
     caballos = shmat(shmid_cab, NULL, 0);
     apostadores = shmat(shmid_apos, NULL, 0);
 
-    init_log();
-
     /* Creacion de procesos hijo */
     /*
        A partir de aqui se deja de tener un control exhaustivo de errores.
@@ -337,18 +343,12 @@ int main(int argc, char* argv[]) {
     shmctl(shmid_cab, IPC_RMID, NULL);
     shmctl(shmid_apos, IPC_RMID, NULL);
 
-    closelog();
     exit(EXIT_SUCCESS);
 }
 
 void usage(){
     printf("Usage is ./simularCarrera <n_caballos> <longitudcarrera> <n_apostadores> <n_ventanillas> <dineroinicial>\n"\
     "n_caballos no puede ser mayor que 10 y n_apostadores no puede ser mayor que 100.\n");
-}
-
-void init_log(){
-    setlogmask(LOG_UPTO(LOG_NOTICE));
-    openlog("proyect_logger",LOG_CONS | LOG_PID | LOG_NDELAY, LOG_LOCAL1);
 }
 
 void _sim_handler(int sig){

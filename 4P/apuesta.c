@@ -38,11 +38,11 @@ double apuesta_total = 0;/*!< Variable que contiene el total de todas las apuest
  *
  * Imprime los datos de la apuesta en un fichero dado
  *
- * @param Fichero en el que escribimos los datos
- * @param Apuesta de la que queremos guardar los datos
- * @param Cotización anterior del caballo
+ * @param fp Fichero en el que escribimos los datos
+ * @param a Apuesta de la que queremos guardar los datos
+ * @param old_cot Cotización anterior del caballo
  */
-void _apuesta_print(FILE *, Apuesta *, double);
+void _apuesta_print(FILE *fp, Apuesta *a, double old_cot);
 
 Apuesta *apuesta_new(){
     return calloc(1, sizeof(Apuesta));
